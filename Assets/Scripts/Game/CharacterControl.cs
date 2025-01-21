@@ -87,7 +87,7 @@ public class CharacterControl : MonoBehaviour
 
         GameObject bombObj = SOManager.I.NetworkObject_SO.NetworkObjectList[0];
 
-        Vector3 offset = new Vector3(0.4f, 0, -0.4f);
+        Vector3 offset = GameDataManager.I.CreateSceneObjectOffset;
         Vector3 spawnPosition = _nearestGrounds.transform.position + offset + Vector3.up * _nearestGrounds.transform.lossyScale.y / 2;
         GameObject bomb = Instantiate(bombObj, spawnPosition, Quaternion.identity);
         bomb.layer = LayerMask.NameToLayer($"{LayerNameEnum.NotCollision}");

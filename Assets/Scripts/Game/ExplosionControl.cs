@@ -86,7 +86,7 @@ public class ExplosionControl : MonoBehaviour
             /*接觸可擊破物*/
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.BreakObstacle}"))
             {
-                Destroy(collider.gameObject);
+                GameSceneManager.I.DespawnBreakObstacle(collider.gameObject);
             }
 
             /*接觸角色*/
