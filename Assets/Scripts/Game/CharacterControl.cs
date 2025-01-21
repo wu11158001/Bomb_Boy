@@ -6,6 +6,8 @@ public class CharacterControl : MonoBehaviour
     private Vector3 _movement;
     private Animator _animator;
 
+    [SerializeField] int ExplotionLevel;
+
     // 移動速度
     private float _moveSpeed = 3;
     // 轉向速度
@@ -62,7 +64,7 @@ public class CharacterControl : MonoBehaviour
 
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Ground}"))
         {
             GameObject collidedObject = collision.gameObject;
             float distanceToPlayer = Vector3.Distance(transform.position, collidedObject.transform.position);
@@ -88,6 +90,6 @@ public class CharacterControl : MonoBehaviour
         Vector3 offset = new Vector3(0.4f, 0, -0.4f);
         Vector3 spawnPosition = _nearestGrounds.transform.position + offset + Vector3.up * _nearestGrounds.transform.lossyScale.y / 2;
         GameObject bomb = Instantiate(bombObj, spawnPosition, Quaternion.identity);
-        bomb.layer = LayerMask.NameToLayer("NotCollision");
+        bomb.layer = LayerMask.NameToLayer($"{LayerNameEnum.NotCollision}");
     }
 }

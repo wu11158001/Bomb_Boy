@@ -2,12 +2,18 @@ using UnityEngine;
 
 public class BombControl : MonoBehaviour
 {
-    [SerializeField] Vector3 _boxSize;
+    // 射線Size
+    private Vector3 _boxSize = new(1.4f, 1.5f, 1.4f);
 
     // 判斷人物是否離開碰撞範圍
     private bool _isCharacterLeave;
     // 爆炸倒數時間
     private  float _explodeCd;
+
+    /// <summary>
+    /// 爆炸等級
+    /// </summary>
+    public int ExplotionLevel { get; set; }
 
     private void OnDrawGizmos()
     {
@@ -21,12 +27,7 @@ public class BombControl : MonoBehaviour
         _explodeCd = 3.0f;
     }
 
-    private void Start()
-    {
-        _boxSize = new Vector3(1.4f, 1.5f, 1.4f);
-    }
-
-    void Update()
+    private void Update()
     {       
         // 等待人物離開更換layer
         if (!_isCharacterLeave)
@@ -34,7 +35,7 @@ public class BombControl : MonoBehaviour
             if (!IsPlayerInRange())
             {
                 _isCharacterLeave = true;
-                gameObject.layer = LayerMask.NameToLayer("Obstacle");
+                gameObject.layer = LayerMask.NameToLayer($"{LayerNameEnum.Bomb}");
             }
         }
 
@@ -42,6 +43,12 @@ public class BombControl : MonoBehaviour
         _explodeCd -= Time.deltaTime;
         if (_explodeCd <= 0)
         {
+            // 生成爆炸效果
+            GameObject explosionObj = SOManager.I.NetworkObject_SO.NetworkObjectList[1];
+            ExplosionControl explosionControl = Instantiate(explosionObj, transform.position, Quaternion.identity).GetComponent<ExplosionControl>();
+            explosionControl.LastCount = ExplotionLevel;
+            explosionControl.IsCenterExplosion = true;
+            explosionControl.InitializeExplosion();
             Destroy(gameObject);
         }
     }
@@ -50,12 +57,12 @@ public class BombControl : MonoBehaviour
     /// 檢查人物是否在方形範圍內
     /// </summary>
     /// <returns></returns>
-    bool IsPlayerInRange()
+    private bool IsPlayerInRange()
     {
-        Collider[] colliders = Physics.OverlapBox(transform.position, _boxSize / 2, Quaternion.identity, LayerMask.GetMask("Character"));
+        Collider[] colliders = Physics.OverlapBox(transform.position, _boxSize / 2, Quaternion.identity, LayerMask.GetMask($"{LayerNameEnum.Character}"));
         foreach (Collider collider in colliders)
         {
-            if (collider.gameObject.layer == LayerMask.NameToLayer("Character")) 
+            if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}")) 
             {
                 return true;  // 角色在範圍內
             }
@@ -64,5 +71,11 @@ public class BombControl : MonoBehaviour
         return false;  // 角色不在範圍內
     }
 
-
+    /// <summary>
+    /// 立即爆炸
+    /// </summary>
+    public void ImmediateExplosion()
+    {
+        _explodeCd = 0;
+    }
 }

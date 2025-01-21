@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NetworkObjectList:
   - {fileID: 4990265395714294682, guid: 8ac0026ea4b654f41bf886d553545066, type: 3}
+  - {fileID: 6965141624582528249, guid: d3d90a987e9cd7e42ae7a9d477613084, type: 3}
