@@ -14,7 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_TableCollectionName: EntryView
   m_TableCollectionNameGuidString: f2e21de79751498469d2f277a81e4b17
-  m_Entries: []
+  m_Entries:
+  - m_Id: 9171118002176
+    m_Key: Bomb boy
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

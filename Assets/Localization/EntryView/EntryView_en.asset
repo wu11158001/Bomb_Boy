@@ -17,7 +17,11 @@ MonoBehaviour:
   m_SharedData: {fileID: 11400000, guid: f2e21de79751498469d2f277a81e4b17, type: 2}
   m_Metadata:
     m_Items: []
-  m_TableData: []
+  m_TableData:
+  - m_Id: 9171118002176
+    m_Localized: Bomb boy
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

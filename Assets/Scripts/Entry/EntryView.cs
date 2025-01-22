@@ -13,6 +13,8 @@ public class EntryView : MonoBehaviour
     [SerializeField] GameObject DebugTool;
     [SerializeField] bool IsUsingDebugTool;
 
+    [SerializeField] GameObject Loading_Obj;
+
     public void Awake()
     {
         DebugTool.SetActive(IsUsingDebugTool);
@@ -20,6 +22,8 @@ public class EntryView : MonoBehaviour
 
     private IEnumerator Start()
     {
+        Loading_Obj.SetActive(true);
+
         LanguageManager.I.InitializeLanguageManager();
         yield return UnityServices.InitializeAsync();
 
@@ -28,5 +32,7 @@ public class EntryView : MonoBehaviour
             Debug.Log($"登入ID:{AuthenticationService.Instance.PlayerId}");
         };
         yield return AuthenticationService.Instance.SignInAnonymouslyAsync();
+
+        Loading_Obj.SetActive(false);
     }
 }
