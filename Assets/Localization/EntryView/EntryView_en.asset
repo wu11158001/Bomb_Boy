@@ -22,6 +22,26 @@ MonoBehaviour:
     m_Localized: Bomb boy
     m_Metadata:
       m_Items: []
+  - m_Id: 12243894472704
+    m_Localized: Enter nickname
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18581655588864
+    m_Localized: Enter game
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26642210295808
+    m_Localized: "\u4E2D\u6587"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 26755217428480
+    m_Localized: English
+    m_Metadata:
+      m_Items: []
+  - m_Id: 28868983066624
+    m_Localized: Nickname error (1 to 15 characters)
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
