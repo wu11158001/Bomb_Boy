@@ -16,7 +16,13 @@ MonoBehaviour:
   m_GUID: 9e6516ca4f0129347b2f92432cc4b89b
   m_SerializeEntries:
   - m_GUID: 1da81bd0d98c79942a8e1d5dc9a0ee5d
-    m_Address: EntryView_en
+    m_Address: Entry_Table_en
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-en
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fdeab5917c7e12642b7fa38f3c2b8319
+    m_Address: Lobby_Table_en
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-en

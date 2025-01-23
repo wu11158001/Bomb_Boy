@@ -1,3 +1,4 @@
+#region 遊戲
 /// <summary>
 /// Layer名稱列表
 /// </summary>
@@ -31,7 +32,9 @@ public enum DropPropsEnum
     // 移動速度強化道具
     SpeedProps,
 }
+#endregion
 
+#region 場景
 /// <summary>
 /// 場景列表
 /// </summary>
@@ -44,7 +47,9 @@ public enum SceneEnum
     // 遊戲
     Game,
 }
+#endregion
 
+#region 介面
 // 一般介面
 public enum ViewEnum
 {
@@ -60,3 +65,44 @@ public enum PermanentViewEnum
     // 載入介面
     LoadingView,
 }
+#endregion
+
+#region Lobby
+/// <summary>
+/// Lobby類型列表
+/// </summary>
+public enum LobbyTypeEnum
+{
+    // 主大廳
+    MainLobby,
+    // 房間
+    RoomLobby,
+}
+
+/// <summary>
+/// Lobby玩家資料Kry
+/// </summary>
+public enum LobbyPlayerDataKey
+{
+    // 玩家暱稱
+    PlayerNickname,
+
+    // 遊戲狀態
+    GameState,
+    In_Game,
+    In_Team,
+    Online,
+}
+
+#endregion
+
+#region 語言
+/// <summary>
+/// 語言配置表列表
+/// </summary>
+public enum LocalizationTableEnum
+{
+    Entry_Table,                    // 入口
+    Lobby_Table,                    // 大廳
+}
+#endregion

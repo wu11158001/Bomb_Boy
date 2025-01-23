@@ -6,6 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Core;
 using Unity.Services.Authentication;
+using System.Threading.Tasks;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 
 public class EntryView : MonoBehaviour
 {
@@ -77,7 +80,7 @@ public class EntryView : MonoBehaviour
         // 發送進入遊戲
         if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            EnterTheGame();
+            JudgeEnterGameData();
         }
     }
 
@@ -113,7 +116,7 @@ public class EntryView : MonoBehaviour
         // 進入遊戲按鈕
         EnterGame_Btn.onClick.AddListener(() =>
         {
-            EnterTheGame();
+            JudgeEnterGameData();
         });
     }
 
@@ -160,9 +163,9 @@ public class EntryView : MonoBehaviour
     }
 
     /// <summary>
-    /// 進入遊戲
+    /// 進入遊戲前資料判斷
     /// </summary>
-    private void EnterTheGame()
+    private void JudgeEnterGameData()
     {
         // 暱稱格式錯誤
         if (Nickname_If.text.Trim().Length == 0)
@@ -171,7 +174,33 @@ public class EntryView : MonoBehaviour
             return;
         }
 
+        IEnterGame();
+    }
+
+    /// <summary>
+    /// 進入遊戲
+    /// </summary>
+    /// <returns></returns>
+    private async void IEnterGame()
+    {
+        ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY, Nickname_If.text);
+
+        // 查詢主大廳
+        QueryResponse queryResponse = await LobbyManager.I.QueryLobbiesAsync();
+        if (queryResponse.Results.Count == 0)
+        {
+            /*未有主大廳*/
+
+            await LobbyManager.I.CreateMainLobby();
+        }
+        else
+        {
+            /*加入主大廳*/
+
+            await LobbyManager.I.JoinMainLobby(queryResponse.Results[0]);
+        }
+
         ChangeSceneManager.I.ChangeScene(SceneEnum.Lobby);
     }
 }

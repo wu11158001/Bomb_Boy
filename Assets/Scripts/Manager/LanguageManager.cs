@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.Localization.Tables;
@@ -7,17 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using TMPro;
-
-/// <summary>
-/// 語言配置表列表
-/// </summary>
-public enum LocalizationTableEnum
-{
-    Common_Table,                   // 共通
-    Entry_Table,                    // 入口
-    Lobby_Table,                    // 大廳
-    Room_Table,                     // 房間
-}
 
 /*
  * 0 = 繁體中文
@@ -37,16 +27,16 @@ public class LanguageManager : UnitySingleton<LanguageManager>
     }
 
     /// <summary>
-    /// 設置文字
+    /// 獲取文字
     /// </summary>
     /// <param name="table"></param>
-    /// <param name="txt"></param>
     /// <param name="key"></param>
-    public void SetText(TextMeshProUGUI txt, LocalizationTableEnum table, string key, string otherStr = "")
+    /// <param name="callback"></param>
+    public void GetString(LocalizationTableEnum table, string key, UnityAction<string> callback)
     {
-        StartCoroutine(ISetText(txt, table, key, otherStr));
+        StartCoroutine(ISetText(table, key, callback));
     }
-    private IEnumerator ISetText(TextMeshProUGUI txt, LocalizationTableEnum table, string key, string otherStr = "")
+    private IEnumerator ISetText(LocalizationTableEnum table, string key, UnityAction<string> callback)
     {
         var loadingOperation = LocalizationSettings.StringDatabase.GetTableAsync($"{table}");
         yield return loadingOperation;
@@ -54,7 +44,7 @@ public class LanguageManager : UnitySingleton<LanguageManager>
         if (loadingOperation.Status == AsyncOperationStatus.Succeeded)
         {
             var stringTable = loadingOperation.Result;
-            txt.text = $"{stringTable.GetEntry(key).GetLocalizedString()}{otherStr}";
+            callback?.Invoke(stringTable.GetEntry(key).GetLocalizedString());
         }
         else
         {

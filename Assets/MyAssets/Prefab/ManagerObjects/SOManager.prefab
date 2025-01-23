@@ -46,4 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NetworkObject_SO: {fileID: 11400000, guid: 0bb3091c6870d034ca082256cb899cc1, type: 2}
   DropProps_SO: {fileID: 11400000, guid: 8334a83148e447a43976e258fde24be3, type: 2}
-  View_SO: {fileID: 0}
+  View_SO: {fileID: 11400000, guid: b29a27577e1970f4f9fbfda6f6537272, type: 2}

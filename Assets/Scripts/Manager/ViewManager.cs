@@ -40,11 +40,77 @@ public class ViewManager : UnitySingleton<ViewManager>
     }
 
     /// <summary>
+    /// 開啟介面
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="viewName"></param>
+    /// <param name="callback"></param>
+    public void OpenView<T>(ViewEnum viewName, UnityAction<T> callback = null) where T : Component
+    {
+        if (CurrSceneCanvasRt == null)
+        {
+            SetCurrSceneCanvas();
+        }
+
+        if (_recodeView.ContainsKey(viewName))
+        {
+            RectTransform view = _recodeView[viewName];
+            CreateViewHandle(view, CurrSceneCanvasRt, callback);
+            _openedView.Push(view);
+        }
+        else
+        {
+            GameObject newViewObj = SOManager.I.View_SO.ViewList[(int)viewName];
+            RectTransform newView = Instantiate(newViewObj, CurrSceneCanvasRt).GetComponent<RectTransform>();
+            CreateViewHandle(newView, CurrSceneCanvasRt, callback);
+            _recodeView.Add(viewName, newView);
+            _openedView.Push(newView);
+        }
+    }
+
+    /// <summary>
     /// 關閉當前介面
     /// </summary>
     public void CloseCurrView()
     {
         _openedView.Pop().gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 開啟常駐介面
+    /// </summary>
+    /// <param name="permanentView"></param>
+    /// <returns></returns>
+    public void OpenPermanentView<T>(PermanentViewEnum permanentView, UnityAction<T> callback = null) where T : Component
+    {
+        if (_recodePermanetView.ContainsKey(permanentView))
+        {
+            _recodePermanetView[permanentView].gameObject.SetActive(true);
+        }
+        else
+        {
+            GameObject viewObj = SOManager.I.View_SO.PermanentViewList[(int)permanentView];
+            RectTransform view = Instantiate(viewObj, PermanentCanvasRt).GetComponent<RectTransform>();
+            CreateViewHandle<RectTransform>(view, PermanentCanvasRt);
+
+            _recodePermanetView.Add(permanentView, view);
+        }
+    }
+
+    /// <summary>
+    /// 關閉常駐介面
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="permanentView"></param>
+    /// <param name="callback"></param>
+    public void ClosePermanentView<T>(PermanentViewEnum permanentView, UnityAction<T> callback = null) where T : Component
+    {
+        if (_recodePermanetView.ContainsKey(permanentView))
+        {
+            _recodePermanetView[permanentView].gameObject.SetActive(false);
+            ActionCallback(_recodePermanetView[permanentView], callback);
+            _recodePermanetView.Remove(permanentView);
+        }
     }
 
     /// <summary>
@@ -87,75 +153,6 @@ public class ViewManager : UnitySingleton<ViewManager>
             {
                 Debug.LogError($"{view.name}: 介面不存在 Component");
             }
-        }
-    }
-
-    /// <summary>
-    /// 開啟一般介面
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="viewName"></param>
-    /// <param name="callback"></param>
-    public void OpenView<T>(ViewEnum viewName, UnityAction<T> callback = null) where T : Component
-    {
-        if (CurrSceneCanvasRt == null)
-        {
-            SetCurrSceneCanvas();
-        }
-
-        if (_recodeView.ContainsKey(viewName))
-        {
-            RectTransform view = _recodeView[viewName];
-            CreateViewHandle(view, CurrSceneCanvasRt, callback);
-            _openedView.Push(view);
-        }
-        else
-        {
-            GameObject newViewObj = SOManager.I.View_SO.ViewList[(int)viewName];
-            RectTransform newView = Instantiate(newViewObj, CurrSceneCanvasRt).GetComponent<RectTransform>();
-            CreateViewHandle(newView, CurrSceneCanvasRt, callback);
-            _recodeView.Add(viewName, newView);
-            _openedView.Push(newView);
-        }
-    }
-
-    /// <summary>
-    /// 開啟常駐介面
-    /// </summary>
-    /// <param name="permanentView"></param>
-    /// <returns></returns>
-    public void OpenPermanentView<T>(PermanentViewEnum permanentView, UnityAction<T> callback = null) where T : Component
-    {
-        if (_recodePermanetView.ContainsKey(permanentView))
-        {
-            _recodePermanetView[permanentView].gameObject.SetActive(true);
-        }
-        else
-        {
-            GameObject viewObj = SOManager.I.View_SO.PermanentViewList[(int)permanentView];
-            RectTransform view = Instantiate(viewObj, PermanentCanvasRt).GetComponent<RectTransform>();
-            CreateViewHandle<RectTransform>(view, PermanentCanvasRt);
-
-            _recodePermanetView.Add(permanentView, view);
-        }
-    }
-
-    /// <summary>
-    /// 關閉常駐介面
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="permanentView"></param>
-    /// <param name="callback"></param>
-    public void ClosePermanentView<T>(PermanentViewEnum permanentView, UnityAction<T> callback = null) where T : Component
-    {
-        if (_recodePermanetView.ContainsKey(permanentView))
-        {
-            _recodePermanetView[permanentView].gameObject.SetActive(false);
-            ActionCallback(_recodePermanetView[permanentView], callback);
-        }
-        else
-        {
-            Debug.LogError($"{permanentView}: 關閉介面不存在");
         }
     }
 }

@@ -16,7 +16,13 @@ MonoBehaviour:
   m_GUID: e963cb568f6ffbc488d27d1b308d4174
   m_SerializeEntries:
   - m_GUID: 9c3bdd7574511384e8601a163c4ba84b
-    m_Address: EntryView_zh-TW
+    m_Address: Entry_Table_zh-TW
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-zh-TW
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8918ea95b7fc9246a2e765f5380ff37
+    m_Address: Lobby_Table_zh-TW
     m_ReadOnly: 1
     m_SerializedLabels:
     - Locale-zh-TW

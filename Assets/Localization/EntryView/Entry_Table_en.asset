@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
-  m_Name: EntryView_zh-TW
+  m_Name: Entry_Table_en
   m_EditorClassIdentifier: 
   m_LocaleId:
-    m_Code: zh-TW
+    m_Code: en
   m_SharedData: {fileID: 11400000, guid: f2e21de79751498469d2f277a81e4b17, type: 2}
   m_Metadata:
     m_Items: []
   m_TableData:
   - m_Id: 9171118002176
-    m_Localized: "\u7206\u7206Boy"
+    m_Localized: Bomb boy
     m_Metadata:
       m_Items: []
   - m_Id: 12243894472704
-    m_Localized: "\u8F38\u5165\u66B1\u7A31"
+    m_Localized: Enter nickname
     m_Metadata:
       m_Items: []
   - m_Id: 18581655588864
-    m_Localized: "\u9032\u5165\u904A\u6232"
+    m_Localized: Enter game
     m_Metadata:
       m_Items: []
   - m_Id: 26642210295808
@@ -39,7 +39,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 28868983066624
-    m_Localized: "\u66B1\u7A31\u932F\u8AA4(1~15\u5B57\u7B26)"
+    m_Localized: Nickname error (1 to 15 characters)
     m_Metadata:
       m_Items: []
   references:
