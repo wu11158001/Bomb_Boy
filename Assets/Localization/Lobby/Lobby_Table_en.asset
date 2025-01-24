@@ -18,12 +18,8 @@ MonoBehaviour:
   m_Metadata:
     m_Items: []
   m_TableData:
-  - m_Id: 295064768512
-    m_Localized: Quick Join
-    m_Metadata:
-      m_Items: []
-  - m_Id: 372374179840
-    m_Localized: Create
+  - m_Id: 818663636275200
+    m_Localized: Leave
     m_Metadata:
       m_Items: []
   references:

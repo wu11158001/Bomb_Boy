@@ -10,7 +10,7 @@ public class Utils : UnitySingleton<Utils>
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="list"></param>
-    public List<T> Shuffle<T>(List<T> list) where T : Component
+    public List<T> Shuffle<T>(List<T> list)
     {
         if (list == null || list.Count == 0)
         {

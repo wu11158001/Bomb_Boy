@@ -41,7 +41,7 @@ public enum DropPropsEnum
 public enum SceneEnum
 {
     // 入口
-    Entry,
+    Entry = 0,
     // 大廳
     Lobby,
     // 遊戲
@@ -53,7 +53,7 @@ public enum SceneEnum
 // 一般介面
 public enum ViewEnum
 {
-    // 大廳介面
+    // 大廳
     LobbyView,
 }
 
@@ -63,35 +63,18 @@ public enum ViewEnum
 public enum PermanentViewEnum
 {
     // 載入介面
-    LoadingView,
+    LoadingView = 0,
 }
 #endregion
 
 #region Lobby
 /// <summary>
-/// Lobby類型列表
-/// </summary>
-public enum LobbyTypeEnum
-{
-    // 主大廳
-    MainLobby,
-    // 房間
-    RoomLobby,
-}
-
-/// <summary>
 /// Lobby玩家資料Kry
 /// </summary>
 public enum LobbyPlayerDataKey
 {
-    // 玩家暱稱
-    PlayerNickname,
-
-    // 遊戲狀態
-    GameState,
-    In_Game,
-    In_Team,
-    Online,
+    // Relay加入代碼
+    RelayJoinCode = 0,
 }
 
 #endregion
@@ -102,7 +85,7 @@ public enum LobbyPlayerDataKey
 /// </summary>
 public enum LocalizationTableEnum
 {
-    Entry_Table,                    // 入口
+    Entry_Table = 0,                // 入口
     Lobby_Table,                    // 大廳
 }
 #endregion

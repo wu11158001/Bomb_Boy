@@ -33,9 +33,11 @@ public class ChangeSceneManager : UnitySingleton<ChangeSceneManager>
         {
             // 大廳
             case SceneEnum.Lobby:
-                ViewManager.I.OpenView<RectTransform>(ViewEnum.LobbyView);
+                ViewManager.I.OpenView<LobbyView>(ViewEnum.LobbyView);
                 break;
         }
+
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
     }
 
     /// <summary>
@@ -46,6 +48,7 @@ public class ChangeSceneManager : UnitySingleton<ChangeSceneManager>
     {
         if (NetworkManager.Singleton.IsServer)
         {
+            Debug.Log($"更換場景_同步: {scene}");
             NetworkManager.Singleton.SceneManager.LoadScene($"{scene}", LoadSceneMode.Single);
         }
     }

@@ -36,6 +36,7 @@ public class ViewManager : UnitySingleton<ViewManager>
     public void ResetViewData()
     {
         SetCurrSceneCanvas();
+        _recodeView.Clear();
         _openedView.Clear();
     }
 

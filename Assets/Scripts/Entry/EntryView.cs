@@ -19,7 +19,7 @@ public class EntryView : MonoBehaviour
     [SerializeField] GameObject Loading_Obj;
     [SerializeField] TMP_InputField Nickname_If;
     [SerializeField] TextMeshProUGUI NicknameErrorTip_Txt;
-    [SerializeField] Button EnterGame_Btn;
+    [SerializeField] Button JoinLobby;
 
     [Space(30)]
     [Header("語言")]
@@ -113,8 +113,8 @@ public class EntryView : MonoBehaviour
             NicknameErrorTip_Txt.gameObject.SetActive(false);
         });
 
-        // 進入遊戲按鈕
-        EnterGame_Btn.onClick.AddListener(() =>
+        // 加入大廳按鈕
+        JoinLobby.onClick.AddListener(() =>
         {
             JudgeEnterGameData();
         });
@@ -186,20 +186,7 @@ public class EntryView : MonoBehaviour
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY, Nickname_If.text);
 
-        // 查詢主大廳
-        QueryResponse queryResponse = await LobbyManager.I.QueryLobbiesAsync();
-        if (queryResponse.Results.Count == 0)
-        {
-            /*未有主大廳*/
-
-            await LobbyManager.I.CreateMainLobby();
-        }
-        else
-        {
-            /*加入主大廳*/
-
-            await LobbyManager.I.JoinMainLobby(queryResponse.Results[0]);
-        }
+        await LobbyManager.I.QuickJoinLobby();
 
         ChangeSceneManager.I.ChangeScene(SceneEnum.Lobby);
     }

@@ -15,12 +15,8 @@ MonoBehaviour:
   m_TableCollectionName: Lobby_Table
   m_TableCollectionNameGuidString: 87b7dcc668e72914abbc22e66af548cb
   m_Entries:
-  - m_Id: 295064768512
-    m_Key: Quick Join
-    m_Metadata:
-      m_Items: []
-  - m_Id: 372374179840
-    m_Key: Create
+  - m_Id: 818663636275200
+    m_Key: Leave
     m_Metadata:
       m_Items: []
   m_Metadata:

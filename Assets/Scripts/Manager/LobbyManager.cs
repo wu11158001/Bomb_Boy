@@ -11,173 +11,139 @@ using Unity.Netcode;
 
 public class LobbyManager : UnitySingleton<LobbyManager>
 {
-    // 主大廳
-    public Lobby JoinedMainLobby { get; private set; }
-    // 加入的房間
-    public Lobby JoinedRoomLobby { get; private set; }
+    public Lobby JoinedLobby { get; private set; }
+
+    private void OnDestroy()
+    {
+        CancelInvoke(nameof(HandleLobbyHeartbeat));
+    }
 
     private void Start()
     {
-        InvokeRepeating(nameof(HandleMainLobbyHeartbeat), 10, 10);
+        InvokeRepeating(nameof(HandleLobbyHeartbeat), 15, 15);
     }
 
-    #region 主大廳
     /// <summary>
-    /// 查詢已加入的主大廳資料
+    /// 創建大廳
     /// </summary>
-    /// <param name="joinedMainLobbyId"></param>
     /// <returns></returns>
-    public async Task<Lobby> QueryLobbiesAsync(string joinedMainLobbyId)
+    public async Task CreateLobby()
     {
         try
         {
-            // 篩選排序
-            QueryLobbiesOptions queryLobbiesOptions = new()
-            {
-                Order = new()
-                {
-                    new QueryOrder(false, QueryOrder.FieldOptions.Created)
-                }
-            };
-
-            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync();
-
-            foreach (var mainLobby in queryResponse.Results)
-            {
-                if (mainLobby.Id == joinedMainLobbyId)
-                {
-                    return mainLobby;
-                }
-            }
-
-            Debug.LogError("查詢已加入的主大廳資料錯誤");
-            return null;
-        }
-        catch (LobbyServiceException e)
-        {
-            Debug.LogError($"查詢已加入的主大廳資料錯誤: {e}");
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// 查詢可加入的主大廳列表
-    /// </summary>
-    public async Task<QueryResponse> QueryLobbiesAsync()
-    {
-        try
-        {
-            // 篩選排序
-            QueryLobbiesOptions queryLobbiesOptions = new()
-            {
-                Filters = new List<QueryFilter>()
-                {
-                    // 大廳類型=主大廳
-                    new QueryFilter(QueryFilter.FieldOptions.S1, $"{LobbyTypeEnum.MainLobby}", QueryFilter.OpOptions.EQ),
-                    // 剩餘空位數 > 10
-                    new QueryFilter(QueryFilter.FieldOptions.AvailableSlots, "10", QueryFilter.OpOptions.GT),
-                },
-                Order = new()
-                {
-                    new QueryOrder(false, QueryOrder.FieldOptions.Created)
-                }
-            };
-
-            // 查詢房間
-            return await LobbyService.Instance.QueryLobbiesAsync();
-        }
-        catch (LobbyServiceException e)
-        {
-            Debug.LogError($"查詢可加入的主大廳列表錯誤: {e}");
-            return null;
-        }
-    }
-
-    /// <summary>
-    /// 創建主大廳
-    /// </summary>
-    public async Task CreateMainLobby()
-    {
-        try
-        {
-            // 最大玩家人數
-            int maxPlayer = 100;
+            // 大廳人數
+            int maxPlayer = 4;
             // 本地玩家暱稱
             string recodeNickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY);
+            // 本地玩家Id
+            string id = AuthenticationService.Instance.PlayerId;
 
+            // 創建Relay
+            string relayJoinCode = await RelayManager.I.CreateRelay(maxPlayer - 1);
+
+            // 創建Lobby
             CreateLobbyOptions createLobbyOptions = new()
             {
-                IsPrivate = false,
-                Player = new Player()
-                {
-                    Data = new Dictionary<string, PlayerDataObject>()
-                    {
-                        // 玩家暱稱
-                        { $"{LobbyPlayerDataKey.PlayerNickname}", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, recodeNickname)},
-                        // 遊戲狀態
-                        { $"{LobbyPlayerDataKey.GameState}", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, $"{LobbyPlayerDataKey.Online}")},
-                    },
-                },
                 Data = new Dictionary<string, DataObject>()
                 {
-                    { "LobbyType", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyTypeEnum.MainLobby}")},
+                    // Relay加入代碼
+                    { $"{LobbyPlayerDataKey.RelayJoinCode}", new DataObject(DataObject.VisibilityOptions.Public, relayJoinCode)},
                 },
             };
 
-            Lobby lobby = await LobbyService.Instance.CreateLobbyAsync("MainLobby", maxPlayer, createLobbyOptions);
-            JoinedMainLobby = lobby;
-
-            Debug.Log($"創建主大廳, LobbyId: {lobby.Id}");
+            JoinedLobby = await LobbyService.Instance.CreateLobbyAsync(id, maxPlayer, createLobbyOptions);
+            Debug.Log($"創建大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
         {
-            Debug.LogError($"創建主大廳錯誤: {e}");
+            Debug.LogError($"創建大廳錯誤: {e}");
         }
     }
 
     /// <summary>
-    /// 加入主大廳
+    /// 加入大廳
     /// </summary>
     /// <param name="joinLobby"></param>
-    public async Task JoinMainLobby(Lobby joinLobby)
+    public async Task JoinLobby(Lobby joinLobby)
     {
         try
         {
             // 本地玩家暱稱
             string recodeNickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY);
+            // Relay加入代碼
+            string relayJoinCode = joinLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
 
-            JoinLobbyByIdOptions joinLobbyByIdOptions = new()
-            {
-                Player = new Player()
-                {
-                    Data = new Dictionary<string, PlayerDataObject>()
-                    {
-                        // 玩家暱稱
-                        { $"{LobbyPlayerDataKey.PlayerNickname}", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, recodeNickname)},
-                        // 遊戲狀態
-                        { $"{LobbyPlayerDataKey.GameState}", new PlayerDataObject(PlayerDataObject.VisibilityOptions.Public, $"{LobbyPlayerDataKey.Online}")},
-                    },
-                },
-            };
+            // 加入Relay
+            await RelayManager.I.JoinRelay(relayJoinCode);
 
-            Lobby lobby = await LobbyService.Instance.JoinLobbyByIdAsync(joinLobby.Id, joinLobbyByIdOptions);
-            JoinedMainLobby = lobby;
+            // 加入Lobby
+            JoinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(joinLobby.Id);
+            Debug.Log($"加入大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
         {
-            Debug.LogError($"加入主大廳錯誤: {e}");
+            Debug.LogError($"加入大廳錯誤: {e}");
         }
     }
+
     /// <summary>
-    /// 處理主大廳心跳
+    /// 快速加入大廳
     /// </summary>
-    public async void HandleMainLobbyHeartbeat()
+    /// <returns></returns>
+    public async Task QuickJoinLobby()
     {
-        if (JoinedMainLobby != null &&
-            JoinedMainLobby.HostId == AuthenticationService.Instance.PlayerId)
+        try
         {
-            await LobbyService.Instance.SendHeartbeatPingAsync(JoinedMainLobby.Id);
+            // 快速加入Lobby
+            JoinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+
+            // 加入Relay
+            string relayJoinCode = JoinedLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
+            await RelayManager.I.JoinRelay(relayJoinCode);
+
+            Debug.Log($"快速加入大廳, LobbyId: {JoinedLobby.Id}");
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.Log($"快速加入大廳失敗: {e}");
+
+            await CreateLobby();
         }
     }
-    #endregion
+
+    /// <summary>
+    /// 離開大廳
+    /// </summary>
+    public async void LeaveLobby()
+    {
+        try
+        {
+            if (JoinedLobby != null)
+            {
+                CancelInvoke(nameof(HandleLobbyHeartbeat));
+                await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, AuthenticationService.Instance.PlayerId);
+                NetworkManager.Singleton.Shutdown(true);
+
+                JoinedLobby = null;
+
+                Debug.Log("離開大廳");
+            }
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError($"離開大廳錯誤: {e}");
+        }
+    }
+
+    /// <summary>
+    /// 處理房間心跳
+    /// </summary>
+    public async void HandleLobbyHeartbeat()
+    {
+        if (JoinedLobby != null &&
+            JoinedLobby.HostId == AuthenticationService.Instance.PlayerId)
+        {
+            await LobbyService.Instance.SendHeartbeatPingAsync(JoinedLobby.Id);
+        }
+    }
 }
