@@ -36,8 +36,6 @@ public class ChangeSceneManager : UnitySingleton<ChangeSceneManager>
                 ViewManager.I.OpenView<LobbyView>(ViewEnum.LobbyView);
                 break;
         }
-
-        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
     }
 
     /// <summary>

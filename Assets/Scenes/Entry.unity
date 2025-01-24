@@ -956,8 +956,24 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2005895527074089118, guid: f95c7a4d7ede6d349a944fd54d6aaa2c, type: 3}
+      propertyPath: Ownership
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2005895527074089118, guid: f95c7a4d7ede6d349a944fd54d6aaa2c, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 967832262
+      objectReference: {fileID: 0}
+    - target: {fileID: 2005895527074089118, guid: f95c7a4d7ede6d349a944fd54d6aaa2c, type: 3}
+      propertyPath: AutoObjectParentSync
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2005895527074089118, guid: f95c7a4d7ede6d349a944fd54d6aaa2c, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2005895527074089118, guid: f95c7a4d7ede6d349a944fd54d6aaa2c, type: 3}
+      propertyPath: SyncOwnerTransformWhenParented
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5776239852347523463, guid: f95c7a4d7ede6d349a944fd54d6aaa2c, type: 3}
       propertyPath: m_Name
@@ -1017,8 +1033,24 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 2512508485638404144, guid: ac63d3da42a4ecf4d9db991a2040702c, type: 3}
+      propertyPath: Ownership
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2512508485638404144, guid: ac63d3da42a4ecf4d9db991a2040702c, type: 3}
       propertyPath: GlobalObjectIdHash
       value: 2375242114
+      objectReference: {fileID: 0}
+    - target: {fileID: 2512508485638404144, guid: ac63d3da42a4ecf4d9db991a2040702c, type: 3}
+      propertyPath: AutoObjectParentSync
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2512508485638404144, guid: ac63d3da42a4ecf4d9db991a2040702c, type: 3}
+      propertyPath: SceneMigrationSynchronization
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2512508485638404144, guid: ac63d3da42a4ecf4d9db991a2040702c, type: 3}
+      propertyPath: SyncOwnerTransformWhenParented
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7775172610195961201, guid: ac63d3da42a4ecf4d9db991a2040702c, type: 3}
       propertyPath: m_Name

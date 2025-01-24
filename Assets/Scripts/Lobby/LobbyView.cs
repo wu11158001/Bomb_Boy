@@ -17,9 +17,13 @@ public class LobbyView : MonoBehaviour
     [SerializeField] RectTransform LobbyPlayerArea;
     [SerializeField] GameObject LobbyPlayerItemSample;
 
+    // 大廳玩家項目
     private LobbyPlayerItem[] _lobbyPlayerItem_Array = new LobbyPlayerItem[4];
 
-    private async void Start()
+    // 是否首次進入
+    private bool _isFirstUpdated;
+
+    private void Start()
     {
         // 產生大廳玩家項目
         for (int i = 0; i < 4; i++)
@@ -34,18 +38,6 @@ public class LobbyView : MonoBehaviour
 
         EventListener();
         UpdateListPlayerItem();
-
-        // 更新房間狀態
-        await LobbyManager.I.UpdateLobbyData(new Dictionary<string, DataObject>()
-        {
-            {$"{LobbyDataKey.State}", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyDataKey.In_Team}", DataObject.IndexOptions.S1) },
-        });
-
-        // 更新玩家資料
-        PlayerData playerData = LobbyRpcManager.I.GetLocalLobbyPlayerData(NetworkManager.Singleton.LocalClientId);
-        playerData.IsPrepare = false;
-        playerData.IsInGameScene = false;
-        LobbyRpcManager.I.UpdateLobbyPlayerServerRpc(playerData);
     }
 
     /// <summary>
@@ -70,11 +62,11 @@ public class LobbyView : MonoBehaviour
                 {
                     /*是Host*/
 
-                    /*if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    if (NetworkManager.Singleton.ConnectedClients.Count < 2)
                     {
                         Debug.Log("遊戲人數未滿2人");
                         return;
-                    }*/
+                    }
 
                     bool isAllPrepare = true;
                     foreach (var playerData in LobbyRpcManager.I.PlayerData_List)
@@ -132,6 +124,14 @@ public class LobbyView : MonoBehaviour
         {
             _lobbyPlayerItem_Array[i].UpdateLobbyPlayerItem(playerData_List[i]);
         }
+
+        if (!_isFirstUpdated && playerData_List.Count > 0)
+        {
+            /*首次更新*/
+
+            _isFirstUpdated = true;
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        }        
     }
     
     /// <summary>
