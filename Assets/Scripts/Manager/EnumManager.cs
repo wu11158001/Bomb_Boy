@@ -69,6 +69,19 @@ public enum PermanentViewEnum
 
 #region Lobby
 /// <summary>
+/// Lobby資料Key
+/// </summary>
+public enum LobbyDataKey
+{
+    // 大廳狀態
+    State,
+    // 組隊中
+    In_Team,
+    // 遊戲中
+    In_Game,
+}
+
+/// <summary>
 /// Lobby玩家資料Kry
 /// </summary>
 public enum LobbyPlayerDataKey

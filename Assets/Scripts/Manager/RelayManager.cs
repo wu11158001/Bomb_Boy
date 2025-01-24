@@ -17,6 +17,15 @@ using Unity.Collections;
 
 public class RelayManager : UnitySingleton<RelayManager>
 {
+    private void Start()
+    {
+        NetworkManager.Singleton.ConnectionApprovalCallback +=
+            (NetworkManager.ConnectionApprovalRequest connectionApprovalRequest, NetworkManager.ConnectionApprovalResponse connectionApprovalResponse) =>
+            {
+                connectionApprovalResponse.Approved = true;
+            };
+    }
+
     /// <summary>
     /// 創建Relay
     /// </summary>

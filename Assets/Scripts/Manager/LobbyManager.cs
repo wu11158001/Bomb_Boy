@@ -48,6 +48,8 @@ public class LobbyManager : UnitySingleton<LobbyManager>
                 {
                     // Relay加入代碼
                     { $"{LobbyPlayerDataKey.RelayJoinCode}", new DataObject(DataObject.VisibilityOptions.Public, relayJoinCode)},
+                    // 房間狀態
+                    { $"{LobbyDataKey.State}", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyDataKey.In_Team}", DataObject.IndexOptions.S1)},
                 },
             };
 
@@ -94,8 +96,16 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     {
         try
         {
+            QuickJoinLobbyOptions quickJoinLobbyOptions = new()
+            {
+                Filter = new List<QueryFilter>()
+                {
+                    {new QueryFilter( QueryFilter.FieldOptions.S1, $"{LobbyDataKey.In_Team}", QueryFilter.OpOptions.EQ) },
+                },
+            };
+
             // 快速加入Lobby
-            JoinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync();
+            JoinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync(quickJoinLobbyOptions);
 
             // 加入Relay
             string relayJoinCode = JoinedLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
@@ -114,15 +124,14 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     /// <summary>
     /// 離開大廳
     /// </summary>
-    public async void LeaveLobby()
+    public async Task LeaveLobby()
     {
         try
         {
             if (JoinedLobby != null)
             {
-                CancelInvoke(nameof(HandleLobbyHeartbeat));
-                await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, AuthenticationService.Instance.PlayerId);
                 NetworkManager.Singleton.Shutdown(true);
+                await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
                 JoinedLobby = null;
 
@@ -132,6 +141,62 @@ public class LobbyManager : UnitySingleton<LobbyManager>
         catch (LobbyServiceException e)
         {
             Debug.LogError($"離開大廳錯誤: {e}");
+        }
+    }
+
+    /// <summary>
+    /// 更新大廳資料
+    /// </summary>
+    /// <param name="dataDic"></param>
+    public async Task UpdateLobbyData(Dictionary<string, DataObject> dataDic)
+    {
+        try
+        {
+            if (!IsLobbyHost()) return;
+
+            JoinedLobby = await LobbyService.Instance.UpdateLobbyAsync(JoinedLobby.Id, new UpdateLobbyOptions()
+            {
+                Data = dataDic,
+            });
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError($"更新大廳資料: {e}");
+        }
+    }
+
+    /// <summary>
+    /// 是否是Lobby Host
+    /// </summary>
+    /// <returns></returns>
+    public bool IsLobbyHost()
+    {
+        if (JoinedLobby != null)
+        {
+            return JoinedLobby.HostId == AuthenticationService.Instance.PlayerId;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// 轉讓Lobby Host
+    /// </summary>
+    /// <param name="playerId"></param>
+    public async void MigrateLobbyHost(string playerId)
+    {
+        try
+        {
+            if (!IsLobbyHost()) return;
+
+            JoinedLobby = await LobbyService.Instance.UpdateLobbyAsync(JoinedLobby.Id, new UpdateLobbyOptions()
+            {
+                HostId = playerId,
+            });
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError($"更換 Lobby Host 錯誤: {e}");
         }
     }
 

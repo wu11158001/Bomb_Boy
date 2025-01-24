@@ -39,6 +39,7 @@ public class EntryView : MonoBehaviour
         Loading_Obj.SetActive(true);
         NicknameErrorTip_Txt.gameObject.SetActive(false);
         _initNicknameErrorTxtPos = NicknameErrorTip_Txt.rectTransform.anchoredPosition;
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
 
         LanguageManager.I.InitializeLanguageManager();
         yield return UnityServices.InitializeAsync();

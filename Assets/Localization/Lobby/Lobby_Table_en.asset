@@ -22,6 +22,34 @@ MonoBehaviour:
     m_Localized: Leave
     m_Metadata:
       m_Items: []
+  - m_Id: 823522380943360
+    m_Localized: Migrate host
+    m_Metadata:
+      m_Items: []
+  - m_Id: 824395836362752
+    m_Localized: Host
+    m_Metadata:
+      m_Items: []
+  - m_Id: 824428052811776
+    m_Localized: Prepare
+    m_Metadata:
+      m_Items: []
+  - m_Id: 825306704973824
+    m_Localized: Mute
+    m_Metadata:
+      m_Items: []
+  - m_Id: 834404460728320
+    m_Localized: Start
+    m_Metadata:
+      m_Items: []
+  - m_Id: 838894043729920
+    m_Localized: Enter text
+    m_Metadata:
+      m_Items: []
+  - m_Id: 844091256147968
+    m_Localized: Waiting to join
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []
