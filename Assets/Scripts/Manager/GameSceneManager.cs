@@ -58,12 +58,11 @@ public class GameSceneManager : NetworkBehaviour
         GameObject breakObj = _breakObstacle.Where(x => x == obj).FirstOrDefault();
         if (_recodeDropPropsIndexList.Contains(breakObj.transform))
         {
-            // 產生掉落道具
-            /*DropPropsEnum dropPropsType = (DropPropsEnum)UnityEngine.Random.Range(0, Enum.GetValues(typeof(DropPropsEnum)).Length);
-            DropProps dropProps = Instantiate(SOManager.I.NetworkObject_SO.NetworkObjectList[2]).GetComponent<DropProps>();
+            // 產生掉落道具  
             Vector3 offset = GameDataManager.I.CreateSceneObjectOffset;
-            dropProps.gameObject.transform.position = breakObj.transform.position + offset;
-            dropProps.SetDropPropsType(dropPropsType);*/
+            Vector3 pos = breakObj.transform.position + offset;
+            pos.y = 0.5f;
+            GameRpcManager.I.SpawnDropPropsServerRpc(pos);
         }
 
         GameRpcManager.I.DespawnObjectServerRpc(breakObj.GetComponent<NetworkObject>().NetworkObjectId);

@@ -3,6 +3,7 @@ using Unity.Netcode;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class GameRpcManager : NetworkBehaviour
 {
@@ -162,6 +163,22 @@ public class GameRpcManager : NetworkBehaviour
         explosionControl.IsCenterExplosion = isCenterExplosion;
         explosionControl.ExplosionDirection = dir;
         explosionControl.InitializeExplosion();
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
+    }
+
+    /// <summary>
+    /// 產生掉落道具
+    /// </summary>
+    /// <param name="pos">位置</param>
+    [ServerRpc]
+    public void SpawnDropPropsServerRpc(Vector3 pos)
+    {
+        DropPropsEnum dropPropsType = (DropPropsEnum)UnityEngine.Random.Range(0, Enum.GetValues(typeof(DropPropsEnum)).Length);
+        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[2];
+        GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
+        DropProps dropProps = createObj.GetComponent<DropProps>();
+        dropProps.SetDropPropsType(dropPropsType);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
     }

@@ -1,19 +1,22 @@
 using UnityEngine;
 using Unity.Netcode;
 
-public class DropProps : NetworkBehaviour
+public class DropProps : BaseNetworkObject
 {
     [SerializeField] MeshRenderer _spriteRenderer;
 
-    private DropPropsEnum _dropProps;
+    private DropPropsEnum _dropPropsType;
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (!IsServer) return;
+
         // 接觸角色
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))
         {
-            Debug.Log($"吃到道具: {_dropProps}");
-            Destroy(gameObject);
+            NetworkObject networkObject = collision.gameObject.GetComponent<NetworkObject>();
+            Debug.Log($"{networkObject.NetworkObjectId} 吃到道具: {_dropPropsType}");
+            GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
         }
     }
 
@@ -23,7 +26,7 @@ public class DropProps : NetworkBehaviour
     /// <param name="dropProps"></param>
     public void SetDropPropsType(DropPropsEnum dropProps)
     {
-        _dropProps = dropProps;
+        _dropPropsType = dropProps;
         _spriteRenderer.material = SOManager.I.DropProps_SO.MaterialList[(int)dropProps];
     }
 }

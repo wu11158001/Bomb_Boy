@@ -10,7 +10,7 @@ public class CharacterControl : BaseNetworkObject
     [SerializeField] int ExplotionLevel;
 
     // 移動速度
-    private float _moveSpeed = 4;
+    private float _moveSpeed = 5;
     // 轉向速度
     private const float _turnSpeed = 10f;        
     // 動畫Hash_是否移動
