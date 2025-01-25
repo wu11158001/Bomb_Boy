@@ -62,11 +62,11 @@ public class LobbyView : MonoBehaviour
                 {
                     /*是Host*/
 
-                    if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    /*if (NetworkManager.Singleton.ConnectedClients.Count < 2)
                     {
                         Debug.Log("遊戲人數未滿2人");
                         return;
-                    }
+                    }*/
 
                     bool isAllPrepare = true;
                     foreach (var playerData in LobbyRpcManager.I.PlayerData_List)

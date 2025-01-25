@@ -18,6 +18,8 @@ public enum LayerNameEnum
     Explosion,
     // 炸彈
     Bomb,
+    // 角色生成點
+    SpawnPoint,
 }
 
 /// <summary>

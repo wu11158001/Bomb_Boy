@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class ExplosionControl : MonoBehaviour
+public class ExplosionControl : BaseNetworkObject
 {
     // 射線Size
     private Vector3 _physicsSize = new(0.5f, 1.5f, 0.5f);
@@ -11,7 +12,7 @@ public class ExplosionControl : MonoBehaviour
     public bool IsCenterExplosion { get; set; }
     // 剩餘爆炸次數
     public int LastCount { get; set; }
-    // 爆炸方向(0=上, 1=下, 2=左, 3=右)
+    // 爆炸方向(0=原地, 1=上, 2=下, 3=左, 4=右)
     public int ExplosionDirection { get; set; }
 
     // 消失時間
@@ -39,10 +40,13 @@ public class ExplosionControl : MonoBehaviour
 
     private void Update()
     {
+        if (!IsServer) return;
+
+        // 生存時間倒數
         _despawnTime -= Time.deltaTime;
         if (_despawnTime <= 0)
         {
-            Destroy(gameObject);
+            GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
         }
     }
 
@@ -74,24 +78,27 @@ public class ExplosionControl : MonoBehaviour
         Collider[] colliders = Physics.OverlapBox(transform.position, _physicsSize);
         foreach (Collider collider in colliders)
         {
-            /*接觸炸彈*/
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Bomb}"))
             {
-                if(collider.gameObject.TryGetComponent<BombControl>(out BombControl bombControl))
+                /*接觸炸彈*/
+
+                if (collider.gameObject.TryGetComponent<BombControl>(out BombControl bombControl))
                 {
                     bombControl.ImmediateExplosion();
                 }
             }
 
-            /*接觸可擊破物*/
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.BreakObstacle}"))
             {
+                /*接觸可擊破物*/
+
                 GameSceneManager.I.DespawnBreakObstacle(collider.gameObject);
             }
 
-            /*接觸角色*/
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))
             {
+                /*接觸角色*/
+
                 Debug.Log("角色被炸到");
             }
         }
@@ -133,9 +140,10 @@ public class ExplosionControl : MonoBehaviour
         Collider[] colliders = Physics.OverlapBox(_nextCenters[dir], _physicsSize);
         foreach (Collider collider in colliders)
         {
-            // 下個爆炸位置是障礙物
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Obstacle}"))
             {
+                /*下個爆炸位置是障礙物*/
+
                 isExplosion = false;
                 break;
             }
@@ -143,13 +151,13 @@ public class ExplosionControl : MonoBehaviour
 
         if (isExplosion)
         {
-            // 生成爆炸效果
-            GameObject explosionObj = SOManager.I.NetworkObject_SO.NetworkObjectList[1];
-            ExplosionControl explosionControl = Instantiate(explosionObj, _nextCenters[dir], Quaternion.identity).GetComponent<ExplosionControl>();
-            explosionControl.LastCount = LastCount;
-            explosionControl.ExplosionDirection = dir;
-            explosionControl.IsCenterExplosion = false;
-            explosionControl.InitializeExplosion();
+            /*生成爆炸效果*/
+
+            GameRpcManager.I.SpawnExplosionServerRpc(
+                LastCount,
+                _nextCenters[dir],
+                dir,
+                false);
         }
     }
 }

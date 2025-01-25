@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class CharacterControl : MonoBehaviour
+public class CharacterControl : BaseNetworkObject
 {
     private Rigidbody _rigidbody;
     private Vector3 _movement;
@@ -9,7 +10,7 @@ public class CharacterControl : MonoBehaviour
     [SerializeField] int ExplotionLevel;
 
     // 移動速度
-    private float _moveSpeed = 3;
+    private float _moveSpeed = 4;
     // 轉向速度
     private const float _turnSpeed = 10f;        
     // 動畫Hash_是否移動
@@ -24,8 +25,20 @@ public class CharacterControl : MonoBehaviour
         _animator = GetComponent<Animator>();
     }
 
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            // 設置攝影機跟隨
+            CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
+            cameraFollow.Target = transform;
+        }
+    }
+
     private void Update()
     {
+        if (!IsOwner) return;
+
         _movement = Vector3.zero;
 
         if (Input.GetKey(KeyCode.UpArrow)) _movement.z = 1;
@@ -85,11 +98,11 @@ public class CharacterControl : MonoBehaviour
     {
         if (_nearestGrounds == null) return;
 
-        GameObject bombObj = SOManager.I.NetworkObject_SO.NetworkObjectList[0];
-
         Vector3 offset = GameDataManager.I.CreateSceneObjectOffset;
         Vector3 spawnPosition = _nearestGrounds.transform.position + offset + Vector3.up * _nearestGrounds.transform.lossyScale.y / 2;
-        GameObject bomb = Instantiate(bombObj, spawnPosition, Quaternion.identity);
-        bomb.layer = LayerMask.NameToLayer($"{LayerNameEnum.NotCollision}");
+
+        GameRpcManager.I.SpawnBombServerRpc(
+            ExplotionLevel,
+            spawnPosition);
     }
 }

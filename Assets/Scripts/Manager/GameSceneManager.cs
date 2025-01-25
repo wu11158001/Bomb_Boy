@@ -3,46 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Unity.Netcode;
 
-public class GameSceneManager : MonoBehaviour
+public class GameSceneManager : NetworkBehaviour
 {
     private static GameSceneManager _instance = null;
-    public static GameSceneManager I
-    {
-        get
-        {
-            if (_instance == null)
-            {
-                _instance = FindAnyObjectByType<GameSceneManager>();
-                if (_instance == null)
-                {
-                    GameObject obj = new GameObject();
-                    _instance = obj.AddComponent<GameSceneManager>();
-                    obj.hideFlags = HideFlags.DontSave;
-                    obj.name = typeof(GameSceneManager).Name;
-                }
-            }
+    public static GameSceneManager I { get { return _instance; } }
 
-            return _instance;
-        }
-    }
-
-    // 場景中可擊破物數量
-    private int _dropPropsCount;
     // 場景中可擊破物件
     private GameObject[] _breakObstacle;
     // 紀錄掉落道具可擊破物件
     private List<Transform> _recodeDropPropsIndexList;
 
+    // 場景中可擊破物數量
+    private const int _dropPropsCount = 2;
+
     private void Awake()
     {
-        DontDestroyOnLoad(this.gameObject);
-
-        if (_instance == null) _instance = this as GameSceneManager;
+        if (_instance == null) _instance = this;
         else Destroy(this.gameObject);
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
         InitializeGameSceneManager();
     }
@@ -52,15 +34,17 @@ public class GameSceneManager : MonoBehaviour
     /// </summary>
     public void InitializeGameSceneManager()
     {
+        // 場景中可擊破物件
         _breakObstacle = GameObject.FindGameObjectsWithTag($"{LayerNameEnum.BreakObstacle}");
 
-        _dropPropsCount = 2;
-
-        // 設置掉落道具位置
-        _recodeDropPropsIndexList = new();
-        List<Transform> breakObstacleTransform = _breakObstacle.Select(x => x.transform).ToList();
-        List<Transform> ShuffleBreakObstacle = Utils.I.Shuffle<Transform>(breakObstacleTransform);
-        _recodeDropPropsIndexList = ShuffleBreakObstacle.Take(_dropPropsCount).ToList();
+        if (NetworkManager.Singleton.IsServer)
+        {
+            // 設置掉落道具位置            
+            _recodeDropPropsIndexList = new();
+            List<Transform> breakObstacleTransform = _breakObstacle.Select(x => x.transform).ToList();
+            List<Transform> ShuffleBreakObstacle = Utils.I.Shuffle<Transform>(breakObstacleTransform);
+            _recodeDropPropsIndexList = ShuffleBreakObstacle.Take(_dropPropsCount).ToList();
+        }
     }
 
     /// <summary>
@@ -69,17 +53,19 @@ public class GameSceneManager : MonoBehaviour
     /// <param name="obj"></param>
     public void DespawnBreakObstacle(GameObject obj)
     {
+        if (!IsServer) return;
+
         GameObject breakObj = _breakObstacle.Where(x => x == obj).FirstOrDefault();
         if (_recodeDropPropsIndexList.Contains(breakObj.transform))
         {
             // 產生掉落道具
-            DropPropsEnum dropPropsType = (DropPropsEnum)UnityEngine.Random.Range(0, Enum.GetValues(typeof(DropPropsEnum)).Length);
+            /*DropPropsEnum dropPropsType = (DropPropsEnum)UnityEngine.Random.Range(0, Enum.GetValues(typeof(DropPropsEnum)).Length);
             DropProps dropProps = Instantiate(SOManager.I.NetworkObject_SO.NetworkObjectList[2]).GetComponent<DropProps>();
             Vector3 offset = GameDataManager.I.CreateSceneObjectOffset;
             dropProps.gameObject.transform.position = breakObj.transform.position + offset;
-            dropProps.SetDropPropsType(dropPropsType);
+            dropProps.SetDropPropsType(dropPropsType);*/
         }
 
-        Destroy(breakObj);
+        GameRpcManager.I.DespawnObjectServerRpc(breakObj.GetComponent<NetworkObject>().NetworkObjectId);
     }
 }

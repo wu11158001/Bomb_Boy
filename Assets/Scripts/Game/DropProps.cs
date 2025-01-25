@@ -1,6 +1,7 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class DropProps : MonoBehaviour
+public class DropProps : NetworkBehaviour
 {
     [SerializeField] MeshRenderer _spriteRenderer;
 

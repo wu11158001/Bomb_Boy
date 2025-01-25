@@ -1,14 +1,17 @@
 using UnityEngine;
+using Unity.Netcode;
 
-public class BombControl : MonoBehaviour
+public class BombControl : BaseNetworkObject
 {
-    // 射線Size
-    private Vector3 _boxSize = new(1.4f, 1.5f, 1.4f);
-
     // 判斷人物是否離開碰撞範圍
     private bool _isCharacterLeave;
     // 爆炸倒數時間
-    private  float _explodeCd;
+    private float _explodeCd;
+    // 是否已爆炸
+    private bool _isExplode;
+
+    // 射線Size
+    private Vector3 _boxSize = new(1.4f, 1.5f, 1.4f);
 
     /// <summary>
     /// 爆炸等級
@@ -24,11 +27,14 @@ public class BombControl : MonoBehaviour
     private void OnEnable()
     {
         _isCharacterLeave = false;
+        _isExplode = false;
         _explodeCd = 3.0f;
     }
 
     private void Update()
-    {       
+    {
+        if (!IsServer) return;
+
         // 等待人物離開更換layer
         if (!_isCharacterLeave)
         {
@@ -41,15 +47,18 @@ public class BombControl : MonoBehaviour
 
         // 爆炸倒數
         _explodeCd -= Time.deltaTime;
-        if (_explodeCd <= 0)
+        if (!_isExplode && _explodeCd <= 0)
         {
+            _isExplode = true;
+
             // 生成爆炸效果
-            GameObject explosionObj = SOManager.I.NetworkObject_SO.NetworkObjectList[1];
-            ExplosionControl explosionControl = Instantiate(explosionObj, transform.position, Quaternion.identity).GetComponent<ExplosionControl>();
-            explosionControl.LastCount = ExplotionLevel;
-            explosionControl.IsCenterExplosion = true;
-            explosionControl.InitializeExplosion();
-            Destroy(gameObject);
+            GameRpcManager.I.SpawnExplosionServerRpc(
+                ExplotionLevel, 
+                transform.position,
+                0,
+                true);
+
+            GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
         }
     }
 
