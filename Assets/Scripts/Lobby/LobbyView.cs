@@ -69,7 +69,7 @@ public class LobbyView : MonoBehaviour
                     }*/
 
                     bool isAllPrepare = true;
-                    foreach (var playerData in LobbyRpcManager.I.PlayerData_List)
+                    foreach (var playerData in LobbyRpcManager.I.LobbyPlayerData_List)
                     {
                         if (playerData.IsPrepare == false &&
                             !playerData.IsGameHost)
@@ -99,7 +99,7 @@ public class LobbyView : MonoBehaviour
                 {
                     /*一般玩家*/
 
-                    PlayerData playerData = LobbyRpcManager.I.GetLocalLobbyPlayerData(NetworkManager.Singleton.LocalClientId);
+                    LobbyPlayerData playerData = LobbyRpcManager.I.GetLobbyPlayerData(NetworkManager.Singleton.LocalClientId);
                     playerData.IsPrepare = !playerData.IsPrepare;
                     LobbyRpcManager.I.UpdateLobbyPlayerServerRpc(playerData);
                 }
@@ -119,7 +119,7 @@ public class LobbyView : MonoBehaviour
         }
 
         // 設置大廳玩家項目資料
-        NetworkList<PlayerData> playerData_List = LobbyRpcManager.I.PlayerData_List;
+        NetworkList<LobbyPlayerData> playerData_List = LobbyRpcManager.I.LobbyPlayerData_List;
         for (int i = 0; i < playerData_List.Count; i++)
         {
             _lobbyPlayerItem_Array[i].UpdateLobbyPlayerItem(playerData_List[i]);

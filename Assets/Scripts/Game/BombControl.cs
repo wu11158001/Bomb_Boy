@@ -14,6 +14,11 @@ public class BombControl : BaseNetworkObject
     private Vector3 _boxSize = new(1.4f, 1.5f, 1.4f);
 
     /// <summary>
+    /// 產生角色Id
+    /// </summary>
+    public ulong CharacterObjectId { get; set; }
+
+    /// <summary>
     /// 爆炸等級
     /// </summary>
     public int ExplotionLevel { get; set; }
@@ -58,6 +63,12 @@ public class BombControl : BaseNetworkObject
                 0,
                 true);
 
+            // 更新遊戲玩家資料
+            GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(CharacterObjectId);
+            gamePlayerData.BombCount += 1;
+            GameRpcManager.I.UpdateLobbyPlayerServerRpc(gamePlayerData);
+
+            // 消除物件
             GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
         }
     }

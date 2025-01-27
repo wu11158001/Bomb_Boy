@@ -28,7 +28,7 @@ public enum LayerNameEnum
 public enum DropPropsEnum
 {
     // 炸彈數量增加道具
-    BombIncreaseProps = 0,
+    BombAddProps = 0,
     // 爆炸等級強化道具
     PowerProps,
     // 移動速度強化道具

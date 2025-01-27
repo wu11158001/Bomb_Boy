@@ -4,15 +4,31 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using UnityEngine.SceneManagement;
 
 public class GameRpcManager : NetworkBehaviour
 {
     private static GameRpcManager _instance;
     public static GameRpcManager I { get { return _instance; } }
 
+    // 所有遊戲玩家資料
+    public NetworkList<GamePlayerData> GamePlayerData_List { get; private set; }
+       = new(null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+
+    // 掉落道具_炸彈數量增加_剩餘數量
+    public NetworkVariable<int> BombAddPropsRemainingQuantity { get; private set; }
+        = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    // 掉落道具_爆炸等級_剩餘數量
+    public NetworkVariable<int> PowerPropsRemainingQuantity { get; private set; }
+    = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    // 掉落道具_移動速度_剩餘數量
+    public NetworkVariable<int> SpeedPropsRemainingQuantity { get; private set; }
+    = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private GameView _gameView;
 
     // 角色生成位置
+    private List<Vector3> shuffleSpawnPos;
     private Vector3[] _spawnCharacterPos_Array = new Vector3[4] 
     {
         new Vector3(1.6f, 0, 0),
@@ -32,6 +48,45 @@ public class GameRpcManager : NetworkBehaviour
         DontDestroyOnLoad(this);
     }
 
+    public override void OnNetworkDespawn()
+    {
+        GamePlayerData_List.OnListChanged -= OnGamePlayerChange;
+    }
+
+    public override void OnNetworkSpawn()
+    {
+        GamePlayerData_List.OnListChanged += OnGamePlayerChange;
+    }
+
+    /// <summary>
+    /// 遊戲玩家資料變更
+    /// </summary>
+    /// <param name="changeEvent"></param>
+    private void OnGamePlayerChange(NetworkListEvent<GamePlayerData> changeEvent)
+    {
+        // 遊戲中角色更新
+        if (SceneManager.GetActiveScene().name == $"{SceneEnum.Game}")
+        {
+            foreach (var gamePlayerData in GamePlayerData_List)
+            {
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(gamePlayerData.CharacterId, out NetworkObject networkObject))
+                {
+                    CharacterControl characterControl = networkObject.gameObject.GetComponent<CharacterControl>();
+                    characterControl.UpdateCharacterData();
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 初始化遊戲Rpc管理
+    /// </summary>
+    public void InitializeGameRpcManager()
+    {
+        shuffleSpawnPos = Utils.I.Shuffle(_spawnCharacterPos_Array.ToList());
+        GamePlayerData_List.Clear();
+    }
+
     /// <summary>
     /// (Server)進入遊戲
     /// </summary>
@@ -41,39 +96,38 @@ public class GameRpcManager : NetworkBehaviour
     {
         Debug.Log($"玩家: {networkClientId} 已進入遊戲場景");
 
-        PlayerData playerData = LobbyRpcManager.I.GetLocalLobbyPlayerData(networkClientId);
-        playerData.IsInGameScene = true;
-        LobbyRpcManager.I.UpdateLobbyPlayerServerRpc(playerData);
+        // 生成角色
+        int index = GamePlayerData_List.Count;
+        float rotY = shuffleSpawnPos[index].x > 0 ? 0 : 180;
+        Vector3 rot = new(0, rotY, 0);
 
-        bool isAllPlayerInGame = true;
-        foreach (var player in LobbyRpcManager.I.PlayerData_List)
+        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[3].gameObject;
+        GameObject obj = Instantiate(createObj);
+        obj.name = $"Character_{LobbyRpcManager.I.LobbyPlayerData_List[index].NetworkClientId}";
+        obj.transform.position = shuffleSpawnPos[index] + GameDataManager.I.CreateSceneObjectOffset;
+        obj.transform.eulerAngles = rot;
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.SpawnWithOwnership(LobbyRpcManager.I.LobbyPlayerData_List[index].NetworkClientId, true);
+
+        // 初始化掉落道具數量
+        BombAddPropsRemainingQuantity.Value = 12;
+        PowerPropsRemainingQuantity.Value = 13;
+        SpeedPropsRemainingQuantity.Value = 15;
+
+        // 初始化玩家資料
+        GamePlayerData gamePlayerData = new()
         {
-            if (player.IsInGameScene == false)
-            {
-                isAllPlayerInGame = false;
-                break;
-            }
-        }
+            CharacterId = networkObject.NetworkObjectId,
+            BombCount = 2,
+            ExplotionLevel = 1,
+            MoveSpeed = 5,
+        };
+        GamePlayerData_List.Add(gamePlayerData);
 
-        if (isAllPlayerInGame)
+        // 所有玩家進入遊戲場景
+        if (GamePlayerData_List.Count == LobbyRpcManager.I.LobbyPlayerData_List.Count)
         {
             Debug.Log("所有玩家進入遊戲場景");
-
-            // 生成角色
-            List<Vector3> shuffleSpawnPos = Utils.I.Shuffle(_spawnCharacterPos_Array.ToList());
-            for (int i = 0; i < LobbyRpcManager.I.PlayerData_List.Count; i++)
-            {
-                float rotY = shuffleSpawnPos[i].x > 0 ? 0 : 180;
-                Vector3 rot = new Vector3(0, rotY, 0);
-
-                SpawnObjectServerRpc(
-                    LobbyRpcManager.I.PlayerData_List[i].NetworkClientId,
-                    3,
-                    shuffleSpawnPos[i] + GameDataManager.I.CreateSceneObjectOffset,
-                    rot,
-                    $"Character_{LobbyRpcManager.I.PlayerData_List[i].NetworkClientId}");
-            }
-
             GameStartClientRpc();
         }
     }
@@ -114,7 +168,7 @@ public class GameRpcManager : NetworkBehaviour
     }
 
     /// <summary>
-    /// 消除物件
+    /// (Server)消除物件
     /// </summary>
     /// <param name="networkObjectId">物件Id</param>
     [ServerRpc(RequireOwnership = false)]
@@ -133,17 +187,25 @@ public class GameRpcManager : NetworkBehaviour
     /// <summary>
     /// (Server)產生炸彈
     /// </summary>
+    /// <param name="networkClientId"></param>
     /// <param name="explotionLevel">爆炸等級</param>
     /// <param name="pos">位置</param>
-    [ServerRpc(RequireOwnership =false)]
-    public void SpawnBombServerRpc(int explotionLevel, Vector3 pos)
+    [ServerRpc(RequireOwnership = false)]
+    public void SpawnBombServerRpc(ulong networkObjectId, int explotionLevel, Vector3 pos)
     {
         GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[0].gameObject;
         GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
-        BombControl bombControl = obj.GetComponent<BombControl>();
-        bombControl.ExplotionLevel = explotionLevel;
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
+
+        BombControl bombControl = obj.GetComponent<BombControl>();
+        bombControl.CharacterObjectId = networkObjectId;
+        bombControl.ExplotionLevel = explotionLevel;
+
+        // 更新遊戲玩家資料
+        GamePlayerData gamePlayerData = GetGamePlayerData(networkObjectId);
+        gamePlayerData.BombCount -= 1;
+        UpdateLobbyPlayerServerRpc(gamePlayerData);
     }
 
     /// <summary>
@@ -158,29 +220,124 @@ public class GameRpcManager : NetworkBehaviour
     {
         GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[1].gameObject;
         GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
+        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
+        networkObject.Spawn(true);
+
         ExplosionControl explosionControl = obj.GetComponent<ExplosionControl>();
         explosionControl.LastCount = explotionLevel;
         explosionControl.IsCenterExplosion = isCenterExplosion;
         explosionControl.ExplosionDirection = dir;
         explosionControl.InitializeExplosion();
-        NetworkObject networkObject = obj.GetComponent<NetworkObject>();
-        networkObject.Spawn(true);
     }
 
     /// <summary>
-    /// 產生掉落道具
+    /// (Server)產生掉落道具
     /// </summary>
     /// <param name="pos">位置</param>
     [ServerRpc]
     public void SpawnDropPropsServerRpc(Vector3 pos)
     {
-        DropPropsEnum dropPropsType = (DropPropsEnum)UnityEngine.Random.Range(0, Enum.GetValues(typeof(DropPropsEnum)).Length);
+        List<int> takeProps = new();
+        if (BombAddPropsRemainingQuantity.Value > 0) 
+            takeProps.Add((int)DropPropsEnum.BombAddProps);
+        if (PowerPropsRemainingQuantity.Value > 0)
+            takeProps.Add((int)DropPropsEnum.PowerProps);
+        if (SpeedPropsRemainingQuantity.Value > 0)
+            takeProps.Add((int)DropPropsEnum.SpeedProps);
+
+        if (takeProps.Count == 0) return;
+
+        DropPropsEnum dropPropsType = (DropPropsEnum)Utils.I.Shuffle(takeProps)[0];
+        switch (dropPropsType)
+        {
+            case DropPropsEnum.BombAddProps:
+                BombAddPropsRemainingQuantity.Value -= 1;
+                break;
+            case DropPropsEnum.PowerProps:
+                PowerPropsRemainingQuantity.Value -= 1;
+                break;
+            case DropPropsEnum.SpeedProps:
+                SpeedPropsRemainingQuantity.Value -= 1;
+                break;
+        }
+
         GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[2];
         GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
-        DropProps dropProps = createObj.GetComponent<DropProps>();
-        dropProps.SetDropPropsType(dropPropsType);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
+
+        DropProps dropProps = obj.GetComponent<DropProps>();
+        dropProps.SetDropPropsType(dropPropsType);
+    }
+
+    /// <summary>
+    /// (Server)獲得掉落道具
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    /// <param name="propsType">道具類型</param>
+    [ServerRpc]
+    public void GetDropPropsServerRpc(ulong networkObjectId, DropPropsEnum propsType)
+    {
+        Debug.Log($"獲得掉落道具: {propsType}");
+        GamePlayerData gamePlayerData = GetGamePlayerData(networkObjectId);
+
+        switch (propsType)
+        {
+            // 炸彈數量增加道具
+            case DropPropsEnum.BombAddProps:
+                gamePlayerData.BombCount += 1;
+                break;
+
+            // 爆炸等級強化道具
+            case DropPropsEnum.PowerProps:
+                gamePlayerData.ExplotionLevel += 1;
+                break;
+
+            // 移動速度強化道具
+            case DropPropsEnum.SpeedProps:
+                gamePlayerData.MoveSpeed += 1;
+                break;
+        }
+
+        UpdateLobbyPlayerServerRpc(gamePlayerData);
+    }
+
+    /// <summary>
+    /// (Server)更新遊戲玩家資料
+    /// </summary>
+    /// <param name="updatePlayerData"></param>
+    [ServerRpc(RequireOwnership = false)]
+    public void UpdateLobbyPlayerServerRpc(GamePlayerData updatePlayerData)
+    {
+        for (int i = 0; i < GamePlayerData_List.Count; i++)
+        {
+            if (GamePlayerData_List[i].CharacterId == updatePlayerData.CharacterId)
+            {
+                GamePlayerData_List[i] = updatePlayerData;
+                return;
+            }
+        }
+
+        Debug.LogError($"玩家: {updatePlayerData.CharacterId} 更新遊戲玩家資料錯誤");
+    }
+
+    /// <summary>
+    /// 獲取遊戲玩家資料
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    /// <returns></returns>
+    public GamePlayerData GetGamePlayerData(ulong networkObjectId)
+    {
+        for (int i = 0; i < GamePlayerData_List.Count; i++)
+        {
+            if (GamePlayerData_List[i].CharacterId == networkObjectId)
+            {
+                return GamePlayerData_List[i];
+            }
+        }
+
+        Debug.LogError($"玩家: {networkObjectId} 獲取玩家資料錯誤");
+        return new();
     }
 
     /// <summary>

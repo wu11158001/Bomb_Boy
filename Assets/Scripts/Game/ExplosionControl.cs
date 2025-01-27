@@ -64,10 +64,10 @@ public class ExplosionControl : BaseNetworkObject
             new(transform.position.x, transform.position.y, transform.position.z + _nextDistance),
         };
 
+        ExplosionTrigger();
+
         if (IsCenterExplosion) CenterExplosion();
         else DirectionExplosion();
-
-        ExplosionTrigger();
     }
 
     /// <summary>
@@ -93,6 +93,7 @@ public class ExplosionControl : BaseNetworkObject
                 /*接觸可擊破物*/
 
                 GameSceneManager.I.DespawnBreakObstacle(collider.gameObject);
+                LastCount = 0;
             }
 
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))

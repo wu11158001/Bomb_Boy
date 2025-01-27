@@ -15708,7 +15708,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  ExplotionLevel: 0
 --- !u!114 &6955880700343806919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15845,10 +15844,10 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.29362017
+  m_Radius: 0.2535909
   m_Height: 1
   m_Direction: 1
-  m_Center: {x: 0.003418684, y: 0.4901088, z: 0}
+  m_Center: {x: 0, y: 0.4901088, z: -0.0090584755}
 --- !u!1 &6365033349974892402
 GameObject:
   m_ObjectHideFlags: 0

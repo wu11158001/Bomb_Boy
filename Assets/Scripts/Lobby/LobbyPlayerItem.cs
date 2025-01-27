@@ -33,7 +33,7 @@ public class LobbyPlayerItem : MonoBehaviour
     /// 更新大廳玩家列表
     /// </summary>
     /// <param name="lobbyPlayerData"></param>
-    public void UpdateLobbyPlayerItem(PlayerData lobbyPlayerData)
+    public void UpdateLobbyPlayerItem(LobbyPlayerData lobbyPlayerData)
     {
         bool isGameHost = lobbyPlayerData.IsGameHost;
         bool isLocalHost = NetworkManager.Singleton.IsHost;

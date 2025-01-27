@@ -11,12 +11,12 @@ public class GameSceneManager : NetworkBehaviour
     public static GameSceneManager I { get { return _instance; } }
 
     // 場景中可擊破物件
-    private GameObject[] _breakObstacle;
+    private List<GameObject> _breakObstacle;
     // 紀錄掉落道具可擊破物件
     private List<Transform> _recodeDropPropsIndexList;
 
     // 場景中可擊破物數量
-    private const int _dropPropsCount = 2;
+    private const int _dropPropsCount = 45;
 
     private void Awake()
     {
@@ -35,7 +35,7 @@ public class GameSceneManager : NetworkBehaviour
     public void InitializeGameSceneManager()
     {
         // 場景中可擊破物件
-        _breakObstacle = GameObject.FindGameObjectsWithTag($"{LayerNameEnum.BreakObstacle}");
+        _breakObstacle = GameObject.FindGameObjectsWithTag($"{LayerNameEnum.BreakObstacle}").ToList();
 
         if (NetworkManager.Singleton.IsServer)
         {
@@ -56,6 +56,8 @@ public class GameSceneManager : NetworkBehaviour
         if (!IsServer) return;
 
         GameObject breakObj = _breakObstacle.Where(x => x == obj).FirstOrDefault();
+        if (breakObj == null) return;
+
         if (_recodeDropPropsIndexList.Contains(breakObj.transform))
         {
             // 產生掉落道具  
@@ -66,5 +68,7 @@ public class GameSceneManager : NetworkBehaviour
         }
 
         GameRpcManager.I.DespawnObjectServerRpc(breakObj.GetComponent<NetworkObject>().NetworkObjectId);
+
+        _breakObstacle.Remove(breakObj);
     }
 }
