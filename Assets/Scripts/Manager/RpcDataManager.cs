@@ -48,7 +48,7 @@ public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData
 /// </summary>
 public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
 {
-    // 角色Id
+    // 角色物件Id
     public ulong CharacterId;
     // 炸彈數量
     public int BombCount;
@@ -56,13 +56,16 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
     public int ExplotionLevel;
     // 移動速度
     public float MoveSpeed;
+    // 死亡狀態
+    public bool IsDie;
 
     public bool Equals(GamePlayerData other)
     {
         return CharacterId == other.CharacterId &&
                BombCount == other.BombCount &&
                ExplotionLevel == other.ExplotionLevel &&
-               MoveSpeed == other.MoveSpeed;
+               MoveSpeed == other.MoveSpeed &&
+               IsDie == other.IsDie;
     }
 
     public override int GetHashCode()
@@ -71,7 +74,8 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
             CharacterId,
             BombCount,
             ExplotionLevel,
-            MoveSpeed);
+            MoveSpeed,
+            IsDie);
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -80,5 +84,6 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
         serializer.SerializeValue(ref BombCount);
         serializer.SerializeValue(ref ExplotionLevel);
         serializer.SerializeValue(ref MoveSpeed);
+        serializer.SerializeValue(ref IsDie);
     }
 }

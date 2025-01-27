@@ -100,7 +100,9 @@ public class ExplosionControl : BaseNetworkObject
             {
                 /*接觸角色*/
 
-                Debug.Log("角色被炸到");
+                ulong networkObjectId = collider.gameObject.GetComponent<NetworkObject>().NetworkObjectId;
+                GameRpcManager.I.CharacterDieServerRpc(networkObjectId);
+                Debug.Log($"角色物件:{networkObjectId}: 被炸到");
             }
         }
     }

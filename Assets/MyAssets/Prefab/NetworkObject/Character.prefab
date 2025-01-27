@@ -211,7 +211,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -448,8 +448,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.5
-      minScalar: 1
+      scalar: 1.5
+      minScalar: 2
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5186,7 +5186,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -5423,8 +5423,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.5
-      minScalar: 1
+      scalar: 1.5
+      minScalar: 2
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -10060,27 +10060,31 @@ GameObject:
   - component: {fileID: 3613975359308706152}
   - component: {fileID: 6111810898200775834}
   m_Layer: 9
-  m_Name: bomb
+  m_Name: TagObj
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &5238342494201315118
-Transform:
+  m_IsActive: 1
+--- !u!224 &5238342494201315118
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2405251723319569286}
-  serializedVersion: 2
   m_LocalRotation: {x: 0.000000021855694, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.00017694451, y: -0.189, z: 0.0018234667}
-  m_LocalScale: {x: 0.9967841, y: 0.9967841, z: 0.9967841}
+  m_LocalPosition: {x: 0, y: 0, z: 0.0018234667}
+  m_LocalScale: {x: 1.3, y: 1.3, z: 1.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 4693041029925711636}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.00017694451, y: -0.189}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!33 &3613975359308706152
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -10528,7 +10532,7 @@ GameObject:
   - component: {fileID: 4134103170742581875}
   - component: {fileID: 6117042638198463192}
   m_Layer: 9
-  m_Name: Object001
+  m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15691,7 +15695,7 @@ MonoBehaviour:
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
-  DontDestroyWithOwner: 1
+  DontDestroyWithOwner: 0
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
@@ -15708,6 +15712,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  TagObj: {fileID: 2405251723319569286}
+  DieEffect: {fileID: 5366800509026063260}
+  Body: {fileID: 4109586504806703338}
 --- !u!114 &6955880700343806919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15892,12 +15899,12 @@ GameObject:
   - component: {fileID: 5366800509026063260}
   - component: {fileID: 3502175614587896878}
   m_Layer: 9
-  m_Name: smoke_fx01
+  m_Name: DieEffect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &8000616115495407121
 Transform:
   m_ObjectHideFlags: 0
@@ -15934,7 +15941,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -16171,8 +16178,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.5
-      minScalar: 1
+      scalar: 1.5
+      minScalar: 2
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -20837,7 +20844,7 @@ ParticleSystem:
   emitterVelocityMode: 0
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -21074,8 +21081,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 5
+      scalar: 8
+      minScalar: 7
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -30764,7 +30771,7 @@ ParticleSystem:
   emitterVelocityMode: 1
   looping: 0
   prewarm: 0
-  playOnAwake: 1
+  playOnAwake: 0
   useUnscaledTime: 0
   autoRandomSeed: 1
   startDelay:
@@ -31001,7 +31008,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.1
+      scalar: 0.3
       minScalar: 1
       maxCurve:
         serializedVersion: 2

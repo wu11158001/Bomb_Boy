@@ -121,6 +121,7 @@ public class GameRpcManager : NetworkBehaviour
             BombCount = 2,
             ExplotionLevel = 1,
             MoveSpeed = 5,
+            IsDie = false,
         };
         GamePlayerData_List.Add(gamePlayerData);
 
@@ -180,7 +181,7 @@ public class GameRpcManager : NetworkBehaviour
         }
         else
         {
-            Debug.LogError($"未找到 NetworkObjectId {networkObjectId}。");
+            Debug.LogError($"消除物件 未找到 NetworkObjectId {networkObjectId}。");
         }
     }
 
@@ -319,6 +320,39 @@ public class GameRpcManager : NetworkBehaviour
         }
 
         Debug.LogError($"玩家: {updatePlayerData.CharacterId} 更新遊戲玩家資料錯誤");
+    }
+
+    /// <summary>
+    /// (Server)角色死亡
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    [ServerRpc]
+    public void CharacterDieServerRpc(ulong networkObjectId)
+    {
+        GamePlayerData gamePlayerData = GetGamePlayerData(networkObjectId);
+        if (gamePlayerData.IsDie == false)
+        {
+            gamePlayerData.IsDie = true;
+            UpdateLobbyPlayerServerRpc(gamePlayerData);
+            CharacterDieClientRpc(networkObjectId);
+        }
+    }
+
+    /// <summary>
+    /// (Client)角色死亡
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    [ClientRpc]
+    public void CharacterDieClientRpc(ulong networkObjectId)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+        {
+            networkObject.GetComponent<CharacterControl>().OnDie();
+        }
+        else
+        {
+            Debug.LogError($"角色死亡 未找到 NetworkObjectId {networkObjectId}。");
+        }
     }
 
     /// <summary>

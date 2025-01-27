@@ -42,6 +42,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Bomb
+    uniqueID: 1076614661
+    locked: 0
+  - name: Character
+    uniqueID: 2835490755
+    locked: 0
   m_RenderingLayers:
   - Default
   - Light Layer 1

@@ -1,12 +1,13 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections;
+using System.Collections.Generic;
 
 public class CharacterControl : BaseNetworkObject
 {
-    // 射線Size
-    private Vector3 _physicsSize = new(0.5f, 1.5f, 0.5f);
-    // 下個地板射線判斷位置
-    private const float _nextDistance = 1.6f;
+    [SerializeField] GameObject TagObj;
+    [SerializeField] ParticleSystem DieEffect;
+    [SerializeField] GameObject Body;
 
     private Rigidbody _rigidbody;
     private Vector3 _movement;
@@ -18,6 +19,8 @@ public class CharacterControl : BaseNetworkObject
     private int _explotionLevel;
     // 移動速度
     private float _moveSpeed;
+    // 死亡狀態
+    private bool _isDie;
 
     // 轉向速度
     private const float _turnSpeed = 10f;        
@@ -26,20 +29,9 @@ public class CharacterControl : BaseNetworkObject
 
     // 最接近的地板物件
     private GameObject _nearestGrounds;
+    // 攝影機跟隨腳本
+    CameraFollow cameraFollow;
 
-    private void OnDrawGizmos()
-    {
-        // 下個爆炸位置射線
-        Gizmos.color = Color.white;
-        Vector3 center = new(transform.position.x + _nextDistance, transform.position.y, transform.position.z);
-        Gizmos.DrawWireCube(center, _physicsSize);
-        center = new(transform.position.x - _nextDistance, transform.position.y, transform.position.z);
-        Gizmos.DrawWireCube(center, _physicsSize);
-        center = new(transform.position.x, transform.position.y, transform.position.z - _nextDistance);
-        Gizmos.DrawWireCube(center, _physicsSize);
-        center = new(transform.position.x, transform.position.y, transform.position.z + _nextDistance);
-        Gizmos.DrawWireCube(center, _physicsSize);
-    }
     private void Start()
     {
         _rigidbody = GetComponent<Rigidbody>();
@@ -50,10 +42,12 @@ public class CharacterControl : BaseNetworkObject
     {
         base.OnNetworkSpawn();
 
+        TagObj.SetActive(IsOwner);
+
         if (IsOwner)
         {
             // 設置攝影機跟隨
-            CameraFollow cameraFollow = Camera.main.GetComponent<CameraFollow>();
+            cameraFollow = Camera.main.GetComponent<CameraFollow>();
             cameraFollow.Target = transform;
         }
     }
@@ -61,6 +55,7 @@ public class CharacterControl : BaseNetworkObject
     private void Update()
     {
         if (!IsOwner) return;
+        if (_isDie) return;
 
         _movement = Vector3.zero;
 
@@ -76,6 +71,8 @@ public class CharacterControl : BaseNetworkObject
 
     private void FixedUpdate()
     {
+        if (_isDie) return;
+
         if (_movement != Vector3.zero)
         {
             /*角色移動*/
@@ -100,6 +97,9 @@ public class CharacterControl : BaseNetworkObject
 
     private void OnCollisionStay(Collision collision)
     {
+        if (!IsOwner) return;
+        if (_isDie) return;
+
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Ground}"))
         {
             GameObject collidedObject = collision.gameObject;
@@ -136,9 +136,45 @@ public class CharacterControl : BaseNetworkObject
     /// </summary>
     public void UpdateCharacterData()
     {
+        if (!IsOwner) return;
+        if (_isDie) return;
+
         GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(thisObjectId);
         _bombCount = gamePlayerData.BombCount;
         _explotionLevel = gamePlayerData.ExplotionLevel;
         _moveSpeed = gamePlayerData.MoveSpeed;
+        _isDie = gamePlayerData.IsDie;
+    }
+
+    /// <summary>
+    /// 死亡
+    /// </summary>
+    public void OnDie()
+    {
+        _isDie = true;
+        StartCoroutine(IDieBehavior());
+    }
+
+    /// <summary>
+    /// 死亡行為
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator IDieBehavior()
+    {
+        Body.SetActive(false);
+        _rigidbody.isKinematic = true;
+
+        yield return new WaitForSeconds(0.5f);
+
+        DieEffect.Play();
+
+        yield return new WaitForSeconds(2.5f);
+
+        gameObject.SetActive(false);
+
+        if (IsOwner)
+        {
+            cameraFollow.OnLoccalDie();
+        }
     }
 }
