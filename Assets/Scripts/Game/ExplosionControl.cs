@@ -3,11 +3,6 @@ using Unity.Netcode;
 
 public class ExplosionControl : BaseNetworkObject
 {
-    // 射線Size
-    private Vector3 _physicsSize = new(0.5f, 1.5f, 0.5f);
-    // 下個爆炸位置距離
-    private const float _nextDistance = 1.6f;
-
     // 爆炸是否為中心點
     public bool IsCenterExplosion { get; set; }
     // 剩餘爆炸次數
@@ -24,18 +19,18 @@ public class ExplosionControl : BaseNetworkObject
     {
         // 下個爆炸位置射線
         Gizmos.color = Color.red;
-        Vector3 center = new(transform.position.x + _nextDistance, transform.position.y, transform.position.z);
-        Gizmos.DrawWireCube(center, _physicsSize);
-        center = new(transform.position.x - _nextDistance, transform.position.y, transform.position.z);
-        Gizmos.DrawWireCube(center, _physicsSize);
-        center = new(transform.position.x, transform.position.y, transform.position.z - _nextDistance);
-        Gizmos.DrawWireCube(center, _physicsSize);
-        center = new(transform.position.x, transform.position.y, transform.position.z + _nextDistance);
-        Gizmos.DrawWireCube(center, _physicsSize);
+        Vector3 center = new(transform.position.x + GameDataManager.NextGroundDistance, transform.position.y, transform.position.z);
+        Gizmos.DrawWireCube(center, GameDataManager.I.PhysicsSize);
+        center = new(transform.position.x - GameDataManager.NextGroundDistance, transform.position.y, transform.position.z);
+        Gizmos.DrawWireCube(center, GameDataManager.I.PhysicsSize);
+        center = new(transform.position.x, transform.position.y, transform.position.z - GameDataManager.NextGroundDistance);
+        Gizmos.DrawWireCube(center, GameDataManager.I.PhysicsSize);
+        center = new(transform.position.x, transform.position.y, transform.position.z + GameDataManager.NextGroundDistance);
+        Gizmos.DrawWireCube(center, GameDataManager.I.PhysicsSize);
 
         // 當下位置射線
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(transform.position, _physicsSize);
+        Gizmos.DrawWireCube(transform.position, GameDataManager.I.PhysicsSize);
     }
 
     private void Update()
@@ -58,10 +53,10 @@ public class ExplosionControl : BaseNetworkObject
         _despawnTime = 3.0f;
         _nextCenters = new Vector3[]
         {
-            new(transform.position.x + _nextDistance, transform.position.y, transform.position.z),
-            new(transform.position.x - _nextDistance, transform.position.y, transform.position.z),
-            new(transform.position.x, transform.position.y, transform.position.z - _nextDistance),
-            new(transform.position.x, transform.position.y, transform.position.z + _nextDistance),
+            new(transform.position.x + GameDataManager.NextGroundDistance, transform.position.y, transform.position.z),
+            new(transform.position.x - GameDataManager.NextGroundDistance, transform.position.y, transform.position.z),
+            new(transform.position.x, transform.position.y, transform.position.z - GameDataManager.NextGroundDistance),
+            new(transform.position.x, transform.position.y, transform.position.z + GameDataManager.NextGroundDistance),
         };
 
         ExplosionTrigger();
@@ -75,7 +70,7 @@ public class ExplosionControl : BaseNetworkObject
     /// </summary>
     private void ExplosionTrigger()
     {
-        Collider[] colliders = Physics.OverlapBox(transform.position, _physicsSize);
+        Collider[] colliders = Physics.OverlapBox(transform.position, GameDataManager.I.PhysicsSize);
         foreach (Collider collider in colliders)
         {
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Bomb}"))
@@ -140,7 +135,7 @@ public class ExplosionControl : BaseNetworkObject
     private void SpawnNextExplosion(int dir)
     {
         bool isExplosion = true;
-        Collider[] colliders = Physics.OverlapBox(_nextCenters[dir], _physicsSize);
+        Collider[] colliders = Physics.OverlapBox(_nextCenters[dir], GameDataManager.I.PhysicsSize);
         foreach (Collider collider in colliders)
         {
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Obstacle}"))

@@ -368,6 +368,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Leave_Btn: {fileID: 7863300676398051334}
   PrepareOrStart_Btn: {fileID: 825019783488810930}
+  PrepareOrStartBtn_Txt: {fileID: 5577249081335618061}
   LobbyPlayerArea: {fileID: 832709551893873467}
   LobbyPlayerItemSample: {fileID: 8118928398410115647}
 --- !u!222 &2024869793994505420
@@ -714,7 +715,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.0007509748}
+  m_AnchoredPosition: {x: 0, y: 0.0009243863}
   m_SizeDelta: {x: 0, y: 300}
   m_Pivot: {x: 0, y: 1}
 --- !u!1 &2074212082095225705
@@ -3576,7 +3577,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 4639404785572355861}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999965
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

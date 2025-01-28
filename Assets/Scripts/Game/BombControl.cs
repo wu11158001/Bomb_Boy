@@ -1,94 +1,106 @@
 using UnityEngine;
 using Unity.Netcode;
+using System;
+using System.Collections.Generic;
 
 public class BombControl : BaseNetworkObject
 {
-    // 判斷人物是否離開碰撞範圍
-    private bool _isCharacterLeave;
+    private Collider _bombCollider;
+    // 自身碰撞射線範圍
+    private Vector3 _boxSize = new(1.6f, 0, 1.6f);
+    // 回復碰撞距離
+    private const float _collisionRestoreDistance = 1.25f;
+    // 紀錄初始忽略碰撞角色
+    private List<GameObject> _ignorCharacterList = new();
+
     // 爆炸倒數時間
     private float _explodeCd;
     // 是否已爆炸
     private bool _isExplode;
-
-    // 射線Size
-    private Vector3 _boxSize = new(1.4f, 1.5f, 1.4f);
-
-    /// <summary>
-    /// 產生角色Id
-    /// </summary>
-    public ulong CharacterObjectId { get; set; }
 
     /// <summary>
     /// 爆炸等級
     /// </summary>
     public int ExplotionLevel { get; set; }
 
+    // 產生角色Id
+    public NetworkVariable<ulong> CharacterObjectId
+        = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private void OnDrawGizmos()
     {
-        Gizmos.color = Color.red;
+        // 當下位置射線
+        Gizmos.color = Color.blue;
         Gizmos.DrawWireCube(transform.position, _boxSize);
+    }
+
+    private void Awake()
+    {
+        _bombCollider = GetComponent<BoxCollider>();
+    }
+
+    private void Start()
+    {
+        // 初始忽略當前位置的角色碰撞
+        Collider[] colliders = Physics.OverlapBox(transform.position, _boxSize);
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))
+            {
+                /*接觸角色*/
+                Collider playerCollider = collider.gameObject.GetComponent<CapsuleCollider>();
+                Physics.IgnoreCollision(_bombCollider, playerCollider, true);
+                _ignorCharacterList.Add(collider.gameObject);
+                Debug.Log("Add");
+            }
+        }
     }
 
     private void OnEnable()
     {
-        _isCharacterLeave = false;
         _isExplode = false;
-        _explodeCd = 3.0f;
+        _explodeCd = 30.0f;
     }
 
     private void Update()
     {
-        if (!IsServer) return;
-
-        // 等待人物離開更換layer
-        if (!_isCharacterLeave)
+        /*碰撞角色判斷*/
+        for (int i = _ignorCharacterList.Count - 1; i >= 0; i--)
         {
-            if (!IsPlayerInRange())
+            float distance = Vector3.Distance(_ignorCharacterList[i].transform.position, transform.position);
+            if (distance > _collisionRestoreDistance)
             {
-                _isCharacterLeave = true;
-                gameObject.layer = LayerMask.NameToLayer($"{LayerNameEnum.Bomb}");
+                Collider playerCollider = _ignorCharacterList[i].GetComponent<CapsuleCollider>();
+                Physics.IgnoreCollision(_bombCollider, playerCollider, false);
+
+                _ignorCharacterList.Remove(_ignorCharacterList[i]);
             }
         }
 
-        // 爆炸倒數
-        _explodeCd -= Time.deltaTime;
-        if (!_isExplode && _explodeCd <= 0)
+        if (IsServer)
         {
-            _isExplode = true;
-
-            // 生成爆炸效果
-            GameRpcManager.I.SpawnExplosionServerRpc(
-                ExplotionLevel, 
-                transform.position,
-                0,
-                true);
-
-            // 更新遊戲玩家資料
-            GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(CharacterObjectId);
-            gamePlayerData.BombCount += 1;
-            GameRpcManager.I.UpdateLobbyPlayerServerRpc(gamePlayerData);
-
-            // 消除物件
-            GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
-        }
-    }
-
-    /// <summary>
-    /// 檢查人物是否在方形範圍內
-    /// </summary>
-    /// <returns></returns>
-    private bool IsPlayerInRange()
-    {
-        Collider[] colliders = Physics.OverlapBox(transform.position, _boxSize / 2, Quaternion.identity, LayerMask.GetMask($"{LayerNameEnum.Character}"));
-        foreach (Collider collider in colliders)
-        {
-            if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}")) 
+            /*爆炸倒數*/
+            _explodeCd -= Time.deltaTime;
+            if (!_isExplode && _explodeCd <= 0)
             {
-                return true;  // 角色在範圍內
+                _isExplode = true;
+
+                // 生成爆炸效果
+                GameRpcManager.I.SpawnExplosionServerRpc(
+                    ExplotionLevel,
+                    transform.position,
+                    0,
+                    true);
+
+                // 更新遊戲玩家資料
+                GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(CharacterObjectId.Value);
+                gamePlayerData.BombCount += 1;
+                GameRpcManager.I.UpdateLobbyPlayerServerRpc(gamePlayerData);
+
+                // 消除物件
+                GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
             }
         }
-
-        return false;  // 角色不在範圍內
     }
 
     /// <summary>

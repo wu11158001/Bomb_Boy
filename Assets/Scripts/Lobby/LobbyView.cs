@@ -11,6 +11,7 @@ public class LobbyView : MonoBehaviour
     [Header("按鈕")]
     [SerializeField] Button Leave_Btn;
     [SerializeField] Button PrepareOrStart_Btn;
+    [SerializeField] TextMeshProUGUI PrepareOrStartBtn_Txt;
 
     [Space(30)]
     [Header("玩家項目")]
@@ -112,6 +113,16 @@ public class LobbyView : MonoBehaviour
     /// </summary>
     public void UpdateListPlayerItem()
     {
+        // 準備/開始按鈕文字
+        string prepareOrStartBtnText =
+            NetworkManager.Singleton.IsHost ?
+            "Start" :
+            "Prepare";
+        LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, prepareOrStartBtnText, (text) =>
+        {
+            PrepareOrStartBtn_Txt.text = text;
+        });
+
         // 大廳玩家項目初始化
         foreach (var lobbyPlayerItem in _lobbyPlayerItem_Array)
         {

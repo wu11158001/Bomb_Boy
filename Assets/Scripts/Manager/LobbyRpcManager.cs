@@ -57,11 +57,9 @@ public class LobbyRpcManager : NetworkBehaviour
     private void OnClientDisconnect(ulong networkClientId)
     {
         Debug.Log($"有玩家斷線: {networkClientId}");
-        if (NetworkManager.Singleton.IsServer)
-        {
-            RemoveLobbyPlayerServerRpc(networkClientId);
-        }
 
+        RemoveLobbyPlayerServerRpc(networkClientId);
+        
         if (NetworkManager.Singleton.LocalClientId == networkClientId)
         {
             /*離開的是本地端*/
@@ -101,17 +99,20 @@ public class LobbyRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RemoveLobbyPlayerServerRpc(ulong networkClientId)
     {
-        for (int i = LobbyPlayerData_List.Count; i >= 0; i--)
+        if (NetworkManager.Singleton.IsServer)
         {
-            if (LobbyPlayerData_List[i].NetworkClientId == networkClientId)
+            for (int i = LobbyPlayerData_List.Count - 1; i >= 0; i--)
             {
-                Debug.Log($"移除大廳玩家 {networkClientId}");
-                LobbyPlayerData_List.Remove(LobbyPlayerData_List[i]);
-                return;
+                if (LobbyPlayerData_List[i].NetworkClientId == networkClientId)
+                {
+                    Debug.Log($"移除大廳玩家 {networkClientId}");
+                    LobbyPlayerData_List.Remove(LobbyPlayerData_List[i]);
+                    return;
+                }
             }
-        }
 
-        Debug.LogError($"移除大廳玩家錯誤: {networkClientId}");
+            Debug.LogError($"移除大廳玩家錯誤: {networkClientId}");
+        }
     }
 
     /// <summary>

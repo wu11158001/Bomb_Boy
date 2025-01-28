@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 845765372948183892}
   - component: {fileID: 3716082442935350111}
   - component: {fileID: 7129853911993696010}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: sparkle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4853,7 +4853,7 @@ GameObject:
   - component: {fileID: 2374360476878404210}
   - component: {fileID: 730317649097257475}
   - component: {fileID: 8361274578723410420}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: spark2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9991,7 +9991,7 @@ GameObject:
   - component: {fileID: 6757278214495240653}
   - component: {fileID: -1135378133137913626}
   - component: {fileID: 9125142066813904677}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: Bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10032,9 +10032,9 @@ MonoBehaviour:
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
+  SynchronizeTransform: 0
   ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
+  SceneMigrationSynchronization: 0
   SpawnWithObservers: 1
   DontDestroyWithOwner: 1
   AutoObjectParentSync: 1
@@ -10103,7 +10103,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkRigidbodyBaseExpanded: 0
-  UseRigidBodyForMotion: 0
+  UseRigidBodyForMotion: 1
   AutoUpdateKinematicState: 0
   AutoSetKinematicOnDespawn: 1
 --- !u!114 &7741979946034765797
@@ -10202,7 +10202,7 @@ GameObject:
   - component: {fileID: 6950377361309704520}
   - component: {fileID: 2094694166028123372}
   - component: {fileID: 3033787652113599393}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: bomb
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10286,7 +10286,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4957800635479507410}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: particle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10323,7 +10323,7 @@ GameObject:
   - component: {fileID: 8094113268244760653}
   - component: {fileID: 463276604975545645}
   - component: {fileID: 8132697203209259122}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: spark3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -15455,7 +15455,7 @@ GameObject:
   - component: {fileID: 2156135414876687428}
   - component: {fileID: 7194108459930813738}
   - component: {fileID: 4706862969793051116}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: spark
   m_TagString: Untagged
   m_Icon: {fileID: 0}

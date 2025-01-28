@@ -50,6 +50,7 @@ public class GameRpcManager : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        Debug.Log("退出 Game Rpc");
         GamePlayerData_List.OnListChanged -= OnGamePlayerChange;
     }
 
@@ -200,7 +201,7 @@ public class GameRpcManager : NetworkBehaviour
         networkObject.Spawn(true);
 
         BombControl bombControl = obj.GetComponent<BombControl>();
-        bombControl.CharacterObjectId = networkObjectId;
+        bombControl.CharacterObjectId.Value = networkObjectId;
         bombControl.ExplotionLevel = explotionLevel;
 
         // 更新遊戲玩家資料
@@ -382,10 +383,10 @@ public class GameRpcManager : NetworkBehaviour
     {
         if (_gameView == null)
         {
-            GameObject lobbyViewObj = GameObject.Find("GameView");
-            if (lobbyViewObj != null)
+            GameObject gameViewObj = GameObject.Find("GameView");
+            if (gameViewObj != null)
             {
-                _gameView = lobbyViewObj.GetComponent<GameView>();
+                _gameView = gameViewObj.GetComponent<GameView>();
             }
         }
     }

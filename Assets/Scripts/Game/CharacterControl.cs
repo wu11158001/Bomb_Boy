@@ -23,7 +23,7 @@ public class CharacterControl : BaseNetworkObject
     private bool _isDie;
 
     // 轉向速度
-    private const float _turnSpeed = 10f;        
+    private float _turnSpeed = 15f;        
     // 動畫Hash_是否移動
     private readonly int _isMove_Hash = Animator.StringToHash("IsMove");
 
@@ -36,6 +36,13 @@ public class CharacterControl : BaseNetworkObject
     {
         _rigidbody = GetComponent<Rigidbody>();
         _animator = GetComponent<Animator>();
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        base.OnNetworkDespawn();
+
+        StopAllCoroutines();
     }
 
     public override void OnNetworkSpawn()
@@ -63,7 +70,6 @@ public class CharacterControl : BaseNetworkObject
         if (Input.GetKey(KeyCode.DownArrow)) _movement.z = -1;
         if (Input.GetKey(KeyCode.LeftArrow)) _movement.x = -1;
         if (Input.GetKey(KeyCode.RightArrow)) _movement.x = 1;
-
         if (Input.GetKeyDown(KeyCode.Space)) SpawnBomb();
 
         _animator.SetBool(_isMove_Hash, _movement.x != 0 || _movement.z != 0);
@@ -77,8 +83,6 @@ public class CharacterControl : BaseNetworkObject
         {
             /*角色移動*/
 
-            _rigidbody.linearVelocity = _movement.normalized * _moveSpeed;
-
             // 轉向角色朝向
             Quaternion targetRotation = Quaternion.LookRotation(_movement);
             _rigidbody.rotation = Quaternion.Slerp(
@@ -86,6 +90,8 @@ public class CharacterControl : BaseNetworkObject
                 targetRotation,
                 _turnSpeed * Time.fixedDeltaTime
             );
+
+            _rigidbody.linearVelocity = _movement.normalized * _moveSpeed;
         }
         else
         {
@@ -170,10 +176,9 @@ public class CharacterControl : BaseNetworkObject
 
         yield return new WaitForSeconds(2.5f);
 
-        gameObject.SetActive(false);
-
         if (IsOwner)
         {
+            GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
             cameraFollow.OnLoccalDie();
         }
     }

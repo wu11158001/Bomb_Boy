@@ -56,5 +56,13 @@ public class CameraFollow : MonoBehaviour
 
         transform.position = targetPosition;
         transform.rotation = targetRotation;
+
+        // 顯示死亡介面
+        GameObject gameViewObj = GameObject.Find("GameView");
+        if (gameViewObj != null)
+        {
+            GameView gameView = gameViewObj.GetComponent<GameView>();
+            gameView.ShowDieView();
+        }
     }
 }
