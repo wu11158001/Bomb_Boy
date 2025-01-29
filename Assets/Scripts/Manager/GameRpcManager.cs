@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using UnityEngine.SceneManagement;
 using Unity.Collections;
+using Unity.Services.Lobbies.Models;
 
 public class GameRpcManager : NetworkBehaviour
 {
@@ -366,7 +367,7 @@ public class GameRpcManager : NetworkBehaviour
     /// (Server)判斷遊戲結果
     /// </summary>
     [ServerRpc(RequireOwnership =false)]
-    private void JudgeGameResultServerRpc()
+    public void JudgeGameResultServerRpc()
     {
         int survival = 0;
         GamePlayerData winnerData = new();
@@ -492,6 +493,16 @@ public class GameRpcManager : NetworkBehaviour
             yield return new WaitForSeconds(1);
         }
 
+        // 更新房間狀態
+        yield return LobbyManager.I.UpdateLobbyData(new Dictionary<string, DataObject>()
+        {
+            {$"{LobbyDataKey.State}", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyDataKey.In_Team}", DataObject.IndexOptions.S1) },
+        });
+
+        // 重製房間玩家
+        LobbyRpcManager.I.ResetLobbyPlayerDataServerRpc();
+
+        // 返回大廳
         ChangeSceneManager.I.ChangeScene_Network(SceneEnum.Lobby);
     }
 

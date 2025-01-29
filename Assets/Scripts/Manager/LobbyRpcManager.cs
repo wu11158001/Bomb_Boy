@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.SceneManagement;
 
 public class LobbyRpcManager : NetworkBehaviour
 {
@@ -59,7 +60,16 @@ public class LobbyRpcManager : NetworkBehaviour
         Debug.Log($"有玩家斷線: {networkClientId}");
 
         RemoveLobbyPlayerServerRpc(networkClientId);
-        
+
+        if (IsServer)
+        {
+            if (SceneManager.GetActiveScene().name == $"{SceneEnum.Game}")
+            {
+                // 判斷遊戲結果
+                GameRpcManager.I.JudgeGameResultServerRpc();
+            }
+        }
+
         if (NetworkManager.Singleton.LocalClientId == networkClientId)
         {
             /*離開的是本地端*/
@@ -154,6 +164,20 @@ public class LobbyRpcManager : NetworkBehaviour
         if (_lobbyView != null && _lobbyView.gameObject.activeSelf)
         {
             _lobbyView.ReadyInGame();
+        }
+    }
+
+    /// <summary>
+    /// (Server)重製大廳玩家資料
+    /// </summary>
+    [ServerRpc]
+    public void ResetLobbyPlayerDataServerRpc()
+    {
+        foreach (var lobbyPlayerData in LobbyPlayerData_List)
+        {
+            LobbyPlayerData data = lobbyPlayerData;
+            data.IsPrepare = false;
+            UpdateLobbyPlayerServerRpc(data);
         }
     }
 
