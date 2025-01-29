@@ -24,6 +24,11 @@ public class LobbyView : MonoBehaviour
     // 是否首次進入
     private bool _isFirstUpdated;
 
+    private void Awake()
+    {
+        ViewManager.I.ResetViewData();
+    }
+
     private void Start()
     {
         // 產生大廳玩家項目

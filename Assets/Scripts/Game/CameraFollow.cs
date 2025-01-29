@@ -62,7 +62,7 @@ public class CameraFollow : MonoBehaviour
         if (gameViewObj != null)
         {
             GameView gameView = gameViewObj.GetComponent<GameView>();
-            gameView.ShowDieView();
+            gameView.ShowExitBtn();
         }
     }
 }

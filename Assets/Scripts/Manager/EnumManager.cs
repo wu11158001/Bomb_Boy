@@ -102,5 +102,6 @@ public enum LocalizationTableEnum
 {
     Entry_Table = 0,                // 入口
     Lobby_Table,                    // 大廳
+    Game_Table,                     // 遊戲
 }
 #endregion

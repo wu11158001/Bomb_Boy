@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 using UnityEngine.SceneManagement;
+using Unity.Collections;
 
 public class GameRpcManager : NetworkBehaviour
 {
@@ -118,12 +119,14 @@ public class GameRpcManager : NetworkBehaviour
         // 初始化玩家資料
         GamePlayerData gamePlayerData = new()
         {
+            NetworkClientId = LobbyRpcManager.I.LobbyPlayerData_List[index].NetworkClientId,
             CharacterId = networkObject.NetworkObjectId,
             Nickname = LobbyRpcManager.I.LobbyPlayerData_List[index].Nickname,
             BombCount = 2,
             ExplotionLevel = 1,
             MoveSpeed = 5,
             IsDie = false,
+            IsStopAction = true,
         };
         GamePlayerData_List.Add(gamePlayerData);
 
@@ -131,20 +134,21 @@ public class GameRpcManager : NetworkBehaviour
         if (GamePlayerData_List.Count == LobbyRpcManager.I.LobbyPlayerData_List.Count)
         {
             Debug.Log("所有玩家進入遊戲場景");
-            GameStartClientRpc();
+            ShowGameSceneClientRpc();
+            StartCoroutine(IStartGameCD());
         }
     }
 
     /// <summary>
-    /// (Client)遊戲開始
+    /// (Client)顯示遊戲場景
     /// </summary>
     [ClientRpc]
-    private void GameStartClientRpc()
+    private void ShowGameSceneClientRpc()
     {
         CheckGameView();
         if (_gameView != null && _gameView.gameObject.activeSelf)
         {
-            _gameView.GameStart();
+            _gameView.ShowGameScene();
         }
     }
 
@@ -359,26 +363,136 @@ public class GameRpcManager : NetworkBehaviour
     }
 
     /// <summary>
-    /// 判斷遊戲結果
+    /// (Server)判斷遊戲結果
     /// </summary>
     [ServerRpc(RequireOwnership =false)]
     private void JudgeGameResultServerRpc()
     {
         int survival = 0;
+        GamePlayerData winnerData = new();
+
         foreach (var gamePlayerData in GamePlayerData_List)
         {
-            if (!gamePlayerData.IsDie) survival++;
+            if (!gamePlayerData.IsDie)
+            {
+                survival++;
+                winnerData = gamePlayerData;
+            }
         }
 
-        if (survival == 0)
+        if (survival <= 1)
         {
-            /*平手*/
+            // 停止玩家角色動作
+            for (int i = 0; i < GamePlayerData_List.Count; i++)
+            {
+                GamePlayerData gamePlayerData = GetGamePlayerData(GamePlayerData_List[i].CharacterId);
+                gamePlayerData.IsStopAction = true;
+                UpdateLobbyPlayerServerRpc(gamePlayerData);
+            }
 
+            OnGameResultClientRpc(survival == 0, winnerData);
+            StartCoroutine(IReturnToLobbyCD());
         }
-        else if(survival == 1)
+    }
+
+    /// <summary>
+    /// (Client)遊戲結果
+    /// </summary>
+    /// <param name="isDraw">是否平手</param>
+    /// <param name="winnerData">獲勝玩家資料</param>
+    [ClientRpc]
+    private void OnGameResultClientRpc(bool isDraw, GamePlayerData winnerData)
+    {
+        CheckGameView();
+        if (_gameView != null && _gameView.gameObject.activeSelf)
         {
-            /*有玩家獲勝*/
+            _gameView.ShowGameResult(isDraw, winnerData);
         }
+    }
+
+    /// <summary>
+    /// (Client)回到大廳倒數
+    /// </summary>
+    /// <param name="num">倒數數字</param>
+    [ClientRpc]
+    private void ReturnToLobbyCDClientRpc(int num)
+    {
+        CheckGameView();
+        if (_gameView != null && _gameView.gameObject.activeSelf)
+        {
+            _gameView.ShowReturnToLobbyCD(num);
+        }
+    }
+
+    /// <summary>
+    /// (Client)開始遊戲倒數
+    /// </summary>
+    /// <param name="num"></param>
+    [ClientRpc]
+    private void StartGameClientRpc()
+    {
+        CheckGameView();
+        if (_gameView != null && _gameView.gameObject.activeSelf)
+        {
+            _gameView.ShowStartGameCD();
+        }
+    }
+
+    /// <summary>
+    /// (Client)開始遊戲
+    /// </summary>
+    [ClientRpc]
+    private void GameStartClientRpc()
+    {
+        CheckGameView();
+        if (_gameView != null && _gameView.gameObject.activeSelf)
+        {
+            _gameView.ShowGameStart();
+        }
+    }
+
+    /// <summary>
+    /// 開始遊戲倒數
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator IStartGameCD()
+    {
+        if (!IsServer) yield break;
+
+        yield return new WaitForSeconds(1);
+
+        StartGameClientRpc();
+
+        yield return new WaitForSeconds(2);
+
+        // 玩家角色開始動作
+        for (int i = 0; i < GamePlayerData_List.Count; i++)
+        {
+            GamePlayerData gamePlayerData = GetGamePlayerData(GamePlayerData_List[i].CharacterId);
+            gamePlayerData.IsStopAction = false;
+            UpdateLobbyPlayerServerRpc(gamePlayerData);
+        }
+
+        GameStartClientRpc();
+    }
+
+    /// <summary>
+    /// 回到大廳倒數
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator IReturnToLobbyCD()
+    {
+        if (!IsServer) yield break;
+
+        yield return new WaitForSeconds(2);
+
+        for (int i = 3; i >= 0; i--)
+        {
+            ReturnToLobbyCDClientRpc(i);
+            yield return new WaitForSeconds(1);
+        }
+
+        ChangeSceneManager.I.ChangeScene_Network(SceneEnum.Lobby);
     }
 
     /// <summary>

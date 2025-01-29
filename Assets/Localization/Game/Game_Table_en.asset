@@ -31,7 +31,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10733232001024
-    m_Localized: Back to the lobby
+    m_Localized: Return to the lobby
     m_Metadata:
       m_Items: []
   - m_Id: 13484930306048
@@ -43,7 +43,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 14506801172480
-    m_Localized: Tie
+    m_Localized: Draw
+    m_Metadata:
+      m_Items: []
+  - m_Id: 557220366061568
+    m_Localized: Winning Player
     m_Metadata:
       m_Items: []
   references:

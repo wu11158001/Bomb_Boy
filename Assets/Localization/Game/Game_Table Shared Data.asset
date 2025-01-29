@@ -24,7 +24,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 14506801172480
-    m_Key: Tie
+    m_Key: Draw
     m_Metadata:
       m_Items: []
   - m_Id: 8895820664832
@@ -32,7 +32,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10733232001024
-    m_Key: Back to the lobby
+    m_Key: Return to the lobby
     m_Metadata:
       m_Items: []
   - m_Id: 13484930306048
@@ -41,6 +41,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 13599988453376
     m_Key: GO!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 557220366061568
+    m_Key: Winning Player
     m_Metadata:
       m_Items: []
   m_Metadata:

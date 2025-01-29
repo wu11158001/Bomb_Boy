@@ -22,6 +22,8 @@ public class CharacterControl : BaseNetworkObject
     private float _moveSpeed;
     // 死亡狀態
     private bool _isDie;
+    // 停止行為
+    private bool _isStopAction;
 
     // 轉向速度
     private float _turnSpeed = 15f;        
@@ -67,6 +69,7 @@ public class CharacterControl : BaseNetworkObject
     {
         if (!IsOwner) return;
         if (_isDie) return;
+        if (_isStopAction) return;
 
         _movement = Vector3.zero;
 
@@ -163,6 +166,7 @@ public class CharacterControl : BaseNetworkObject
         _explotionLevel = gamePlayerData.ExplotionLevel;
         _moveSpeed = gamePlayerData.MoveSpeed;
         _isDie = gamePlayerData.IsDie;
+        _isStopAction = gamePlayerData.IsStopAction;
     }
 
     /// <summary>

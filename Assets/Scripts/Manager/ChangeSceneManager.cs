@@ -25,17 +25,6 @@ public class ChangeSceneManager : UnitySingleton<ChangeSceneManager>
         }
 
         Debug.Log($"進入場景:{scene} !");
-
-        ViewManager.I.ResetViewData();
-
-        // 產生場景初始化
-        switch (scene)
-        {
-            // 大廳
-            case SceneEnum.Lobby:
-                ViewManager.I.OpenView<LobbyView>(ViewEnum.LobbyView);
-                break;
-        }
     }
 
     /// <summary>
