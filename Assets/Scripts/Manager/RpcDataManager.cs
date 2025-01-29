@@ -50,6 +50,8 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
 {
     // 角色物件Id
     public ulong CharacterId;
+    // 角色暱稱
+    public FixedString64Bytes Nickname;
     // 炸彈數量
     public int BombCount;
     // 爆炸等級
@@ -62,6 +64,7 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
     public bool Equals(GamePlayerData other)
     {
         return CharacterId == other.CharacterId &&
+               Nickname.Equals(other.Nickname) &&
                BombCount == other.BombCount &&
                ExplotionLevel == other.ExplotionLevel &&
                MoveSpeed == other.MoveSpeed &&
@@ -72,6 +75,7 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
     {
         return HashCode.Combine(
             CharacterId,
+            Nickname,
             BombCount,
             ExplotionLevel,
             MoveSpeed,
@@ -81,6 +85,7 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref CharacterId);
+        serializer.SerializeValue(ref Nickname);
         serializer.SerializeValue(ref BombCount);
         serializer.SerializeValue(ref ExplotionLevel);
         serializer.SerializeValue(ref MoveSpeed);

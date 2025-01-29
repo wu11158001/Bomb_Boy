@@ -15715,6 +15715,7 @@ MonoBehaviour:
   TagObj: {fileID: 2405251723319569286}
   DieEffect: {fileID: 5366800509026063260}
   Body: {fileID: 4109586504806703338}
+  Nickname_Txt: {fileID: 0}
 --- !u!114 &6955880700343806919
 MonoBehaviour:
   m_ObjectHideFlags: 0

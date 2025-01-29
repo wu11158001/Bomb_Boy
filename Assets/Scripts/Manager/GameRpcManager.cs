@@ -99,10 +99,10 @@ public class GameRpcManager : NetworkBehaviour
 
         // 生成角色
         int index = GamePlayerData_List.Count;
-        float rotY = shuffleSpawnPos[index].x > 0 ? 0 : 180;
+        float rotY = shuffleSpawnPos[index].z > 0 ? 180 : 0;
         Vector3 rot = new(0, rotY, 0);
 
-        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[3].gameObject;
+        GameObject createObj = SOManager.I.NetworkObject_SO.GameObjectList[3].gameObject;
         GameObject obj = Instantiate(createObj);
         obj.name = $"Character_{LobbyRpcManager.I.LobbyPlayerData_List[index].NetworkClientId}";
         obj.transform.position = shuffleSpawnPos[index] + GameDataManager.I.CreateSceneObjectOffset;
@@ -119,6 +119,7 @@ public class GameRpcManager : NetworkBehaviour
         GamePlayerData gamePlayerData = new()
         {
             CharacterId = networkObject.NetworkObjectId,
+            Nickname = LobbyRpcManager.I.LobbyPlayerData_List[index].Nickname,
             BombCount = 2,
             ExplotionLevel = 1,
             MoveSpeed = 5,
@@ -159,7 +160,7 @@ public class GameRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void SpawnObjectServerRpc(ulong onwerId, int listIndex, Vector3 pos, Vector3 rot = default, string objName = "", bool isServerOwner = false)
     {
-        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[listIndex].gameObject;
+        GameObject createObj = SOManager.I.NetworkObject_SO.GameObjectList[listIndex].gameObject;
         GameObject obj = Instantiate(createObj);
         if (!string.IsNullOrEmpty(objName)) obj.name = objName;
         obj.transform.position = pos;
@@ -195,7 +196,7 @@ public class GameRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void SpawnBombServerRpc(ulong networkObjectId, int explotionLevel, Vector3 pos)
     {
-        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[0].gameObject;
+        GameObject createObj = SOManager.I.NetworkObject_SO.GameObjectList[0].gameObject;
         GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
@@ -220,7 +221,7 @@ public class GameRpcManager : NetworkBehaviour
     [ServerRpc]
     public void SpawnExplosionServerRpc(int explotionLevel, Vector3 pos, int dir, bool isCenterExplosion)
     {
-        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[1].gameObject;
+        GameObject createObj = SOManager.I.NetworkObject_SO.GameObjectList[1].gameObject;
         GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
@@ -263,7 +264,7 @@ public class GameRpcManager : NetworkBehaviour
                 break;
         }
 
-        GameObject createObj = SOManager.I.NetworkObject_SO.NetworkObjectList[2];
+        GameObject createObj = SOManager.I.NetworkObject_SO.GameObjectList[2];
         GameObject obj = Instantiate(createObj, pos, Quaternion.identity);
         NetworkObject networkObject = obj.GetComponent<NetworkObject>();
         networkObject.Spawn(true);
@@ -336,6 +337,7 @@ public class GameRpcManager : NetworkBehaviour
             gamePlayerData.IsDie = true;
             UpdateLobbyPlayerServerRpc(gamePlayerData);
             CharacterDieClientRpc(networkObjectId);
+            JudgeGameResultServerRpc();
         }
     }
 
@@ -353,6 +355,29 @@ public class GameRpcManager : NetworkBehaviour
         else
         {
             Debug.LogError($"角色死亡 未找到 NetworkObjectId {networkObjectId}。");
+        }
+    }
+
+    /// <summary>
+    /// 判斷遊戲結果
+    /// </summary>
+    [ServerRpc(RequireOwnership =false)]
+    private void JudgeGameResultServerRpc()
+    {
+        int survival = 0;
+        foreach (var gamePlayerData in GamePlayerData_List)
+        {
+            if (!gamePlayerData.IsDie) survival++;
+        }
+
+        if (survival == 0)
+        {
+            /*平手*/
+
+        }
+        else if(survival == 1)
+        {
+            /*有玩家獲勝*/
         }
     }
 

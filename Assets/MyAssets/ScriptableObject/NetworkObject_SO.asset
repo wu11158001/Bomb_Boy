@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5824fb16ad9df1845b3400428f5064fb, type: 3}
   m_Name: NetworkObject_SO
   m_EditorClassIdentifier: 
-  NetworkObjectList:
+  GameObjectList:
   - {fileID: 4990265395714294682, guid: 8ac0026ea4b654f41bf886d553545066, type: 3}
   - {fileID: 6965141624582528249, guid: d3d90a987e9cd7e42ae7a9d477613084, type: 3}
   - {fileID: 5312148792676219241, guid: 3e39d1a17d3bd4a4f96fe9edcb8b41f9, type: 3}

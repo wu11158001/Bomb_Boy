@@ -51,7 +51,6 @@ public class BombControl : BaseNetworkObject
                 Collider playerCollider = collider.gameObject.GetComponent<CapsuleCollider>();
                 Physics.IgnoreCollision(_bombCollider, playerCollider, true);
                 _ignorCharacterList.Add(collider.gameObject);
-                Debug.Log("Add");
             }
         }
     }
@@ -59,7 +58,7 @@ public class BombControl : BaseNetworkObject
     private void OnEnable()
     {
         _isExplode = false;
-        _explodeCd = 30.0f;
+        _explodeCd = 3;
     }
 
     private void Update()

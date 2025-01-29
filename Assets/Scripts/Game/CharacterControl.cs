@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 public class CharacterControl : BaseNetworkObject
 {
@@ -31,6 +32,9 @@ public class CharacterControl : BaseNetworkObject
     private GameObject _nearestGrounds;
     // 攝影機跟隨腳本
     CameraFollow cameraFollow;
+
+    // 是否已首次更新資料
+    private bool _isFirstUpdateData;
 
     private void Start()
     {
@@ -142,6 +146,15 @@ public class CharacterControl : BaseNetworkObject
     /// </summary>
     public void UpdateCharacterData()
     {
+        // 首次更新資料
+        if (_isFirstUpdateData == false)
+        {
+            GamePlayerData data = GameRpcManager.I.GetGamePlayerData(thisObjectId);
+            SetNicknameText($"{data.Nickname}");
+            _isFirstUpdateData = true;
+        }
+
+
         if (!IsOwner) return;
         if (_isDie) return;
 
@@ -150,6 +163,23 @@ public class CharacterControl : BaseNetworkObject
         _explotionLevel = gamePlayerData.ExplotionLevel;
         _moveSpeed = gamePlayerData.MoveSpeed;
         _isDie = gamePlayerData.IsDie;
+    }
+
+    /// <summary>
+    /// 設置暱稱文字
+    /// </summary>
+    /// <param name="nickanem"></param>
+    public void SetNicknameText(string nickanem)
+    {
+        string color =
+            IsOwner ?
+            "F6BF23" :
+            "D53C2B";
+        string nicknameStr = $"<color=#{color}>{nickanem}</color>";
+
+        GameObject characterNicknameObj = SOManager.I.NormalObject_SO.GameObjectList[0];
+        CharacterNickname characterNickname = Instantiate(characterNicknameObj).GetComponent<CharacterNickname>();
+        characterNickname.SetFollowCharacter(transform, nicknameStr);
     }
 
     /// <summary>
