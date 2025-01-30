@@ -12,6 +12,7 @@ public class GameView : MonoBehaviour
     [SerializeField] TextMeshProUGUI Winner_Txt;
     [SerializeField] TextMeshProUGUI GameStartCD_Txt;
     [SerializeField] TextMeshProUGUI ReturnLobbyCD_Txt;
+    [SerializeField] GameObject InputController_Obj;
 
     private void Awake()
     {
@@ -27,6 +28,7 @@ public class GameView : MonoBehaviour
         Winner_Txt.gameObject.SetActive(false);
         GameStartCD_Txt.gameObject.SetActive(false);
         ReturnLobbyCD_Txt.gameObject.SetActive(false);
+        InputController_Obj.SetActive(true);
 
         EventListener();
     }
@@ -109,6 +111,7 @@ public class GameView : MonoBehaviour
     /// </summary>
     public void ShowStartGameCD()
     {
+        InputController_Obj.SetActive(true);
         GameStartCD_Txt.gameObject.SetActive(true);
 
         LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, "Ready!", (text) =>
@@ -122,6 +125,8 @@ public class GameView : MonoBehaviour
     /// </summary>
     public void ShowGameStart()
     {
+        InputController_Obj.SetActive(false);
+
         LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, "GO!", (text) =>
         {
             GameStartCD_Txt.text = $"{text}";
