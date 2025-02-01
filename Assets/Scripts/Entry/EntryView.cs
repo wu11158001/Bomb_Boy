@@ -40,6 +40,13 @@ public class EntryView : MonoBehaviour
         Loading_Obj.SetActive(true);
         NicknameErrorTip_Txt.gameObject.SetActive(false);
         _initNicknameErrorTxtPos = NicknameErrorTip_Txt.rectTransform.anchoredPosition;
+
+        // 等待NGO斷線
+        while (NetworkManager.Singleton.IsListening)
+        {
+            yield return null;
+        }
+
         ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
 
         LanguageManager.I.InitializeLanguageManager();

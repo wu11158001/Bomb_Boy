@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Unity.Collections;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
+using Unity.Services.Relay;
 
 public class LobbyRpcManager : NetworkBehaviour
 {
@@ -18,9 +19,6 @@ public class LobbyRpcManager : NetworkBehaviour
         = new(null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private LobbyView _lobbyView;
-
-    // 發出交換房主指令玩家Id
-    private ulong _migrateNetworkClientId;
 
     private void Awake()
     {
@@ -36,8 +34,19 @@ public class LobbyRpcManager : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         Debug.Log("退出 Lobby Rpc");
+
+        // 非手動退出大廳 && 非交換房主
+        if (!LobbyManager.I.IsSelfLeaveLobby &&
+            !LobbyManager.I.IsMigrateLobbyHost)
+        {
+            LobbyManager.I.LeaveLobby();
+        }
+
         NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnect;
         LobbyPlayerData_List.OnListChanged -= OnLobbyPlayerDataChange;
+
+        LobbyManager.I.IsSelfLeaveLobby = false;
+        LobbyManager.I.IsMigrateLobbyHost = false;
     }
 
     public override void OnNetworkSpawn()
@@ -70,7 +79,13 @@ public class LobbyRpcManager : NetworkBehaviour
     /// <param name="networkClientId"></param>
     private void OnClientDisconnect(ulong networkClientId)
     {
-        Debug.Log($"有玩家斷線: {networkClientId}");
+        Debug.Log($"有玩家斷線: {networkClientId} / 本地: {NetworkManager.Singleton.LocalClientId}");
+
+        LobbyPlayerData lobbyPlayerData = GetLobbyPlayerData(networkClientId);
+        if (lobbyPlayerData.NetworkClientId == NetworkManager.Singleton.LocalClientId)
+        {
+            LobbyManager.I.IsMigrateLobbyHost = true;
+        }        
 
         if (IsServer)
         {
@@ -272,7 +287,7 @@ public class LobbyRpcManager : NetworkBehaviour
             });
         }
 
-        await LobbyManager.I.LeaveLobby();
         ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
+        await LobbyManager.I.LeaveLobby();
     }
 }

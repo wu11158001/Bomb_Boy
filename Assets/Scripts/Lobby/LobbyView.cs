@@ -5,6 +5,7 @@ using Unity.Netcode;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
+using Unity.Services.Lobbies;
 
 public class LobbyView : MonoBehaviour
 {
@@ -52,7 +53,7 @@ public class LobbyView : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.K))
         {
-            UpdateListPlayerItem();
+            Debug.Log($"大廳人數:{LobbyManager.I.JoinedLobby.Players.Count}");
         }
 
         if (Input.GetKeyDown(KeyCode.O))
@@ -69,6 +70,7 @@ public class LobbyView : MonoBehaviour
         // 離開按鈕
         Leave_Btn.onClick.AddListener(() =>
         {
+            LobbyManager.I.IsSelfLeaveLobby = true;
             LobbyRpcManager.I.OnLeaveLobby();
         });
 
@@ -77,7 +79,7 @@ public class LobbyView : MonoBehaviour
         {
             if (NetworkManager.Singleton.IsConnectedClient)
             {
-                if (NetworkManager.Singleton.IsHost)
+                if (LobbyManager.I.IsLobbyHost())
                 {
                     /*是Host*/
 
@@ -99,7 +101,7 @@ public class LobbyView : MonoBehaviour
                     foreach (var playerData in LobbyRpcManager.I.LobbyPlayerData_List)
                     {
                         if (playerData.IsPrepare == false &&
-                            !LobbyManager.I.IsLobbyHost())
+                            LobbyManager.I.JoinedLobby.HostId != playerData.AuthenticationPlayerId)
                         {
                             isAllPrepare = false;
                             break;
@@ -120,6 +122,13 @@ public class LobbyView : MonoBehaviour
                     else
                     {
                         Debug.Log("有玩家未準備");
+                        LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "Some players are not prepared", (text) =>
+                        {
+                            ViewManager.I.OpenPermanentView<TipMessageView>(PermanentViewEnum.TipMessageView, (view) =>
+                            {
+                                view.ShowTipMessage(text);
+                            });
+                        });
                     }
                 }
                 else
@@ -141,7 +150,7 @@ public class LobbyView : MonoBehaviour
     {
         // 準備/開始按鈕文字
         string prepareOrStartBtnText =
-            NetworkManager.Singleton.IsHost ?
+            LobbyManager.I.IsLobbyHost() ?
             "Start" :
             "Prepare";
         LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, prepareOrStartBtnText, (text) =>

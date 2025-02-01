@@ -23,6 +23,10 @@ MonoBehaviour:
     m_Key: The number of players is less than 2
     m_Metadata:
       m_Items: []
+  - m_Id: 48577132564480
+    m_Key: Some players are not prepared
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

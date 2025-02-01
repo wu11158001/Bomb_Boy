@@ -11,12 +11,17 @@ using Unity.Netcode;
 
 public class LobbyManager : UnitySingleton<LobbyManager>
 {
+    // 加入的Lobby
     public Lobby JoinedLobby { get; private set; }
-
     // 當前加入Lobby Host Id
-    private string _currLobbyHostId;
+    public string CurrLobbyHostId { get; private set; }
     // 當前加入Relay Join Code
-    private string _currRelayJoinCode;
+    public string CurrRelayJoinCode { get; private set; }
+
+    // 是否是手動退出大廳
+    public bool IsSelfLeaveLobby { get; set; }
+    // 是否正在交換房主
+    public bool IsMigrateLobbyHost { get; set; }
 
     private void OnDestroy()
     {
@@ -44,7 +49,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             // 創建Relay
             string relayJoinCode = await RelayManager.I.CreateRelay(GameDataManager.MaxPlayer - 1);
-            _currRelayJoinCode = relayJoinCode;
+            CurrRelayJoinCode = relayJoinCode;
 
             // 創建Lobby
             CreateLobbyOptions createLobbyOptions = new()
@@ -59,9 +64,9 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             };
             
             JoinedLobby = await LobbyService.Instance.CreateLobbyAsync(id, GameDataManager.MaxPlayer, createLobbyOptions);
-            _currLobbyHostId = JoinedLobby.HostId;
+            CurrLobbyHostId = JoinedLobby.HostId;
 
-            InvokeRepeating(nameof(RefreshRoom), 1.5f, 1.1f);
+            InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"創建大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
@@ -85,13 +90,13 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             // 加入Relay
             await RelayManager.I.JoinRelay(relayJoinCode);
-            _currRelayJoinCode = relayJoinCode;
+            CurrRelayJoinCode = relayJoinCode;
 
             // 加入Lobby
             JoinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(joinLobby.Id);
-            _currLobbyHostId = JoinedLobby.HostId;
+            CurrLobbyHostId = JoinedLobby.HostId;
 
-            InvokeRepeating(nameof(RefreshRoom), 1.5f, 1.1f);
+            InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"加入大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
@@ -118,14 +123,14 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             // 快速加入Lobby
             JoinedLobby = await LobbyService.Instance.QuickJoinLobbyAsync(quickJoinLobbyOptions);
-            _currLobbyHostId = JoinedLobby.HostId;
+            CurrLobbyHostId = JoinedLobby.HostId;
 
             // 加入Relay
             string relayJoinCode = JoinedLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
             await RelayManager.I.JoinRelay(relayJoinCode);
-            _currRelayJoinCode = relayJoinCode;
+            CurrRelayJoinCode = relayJoinCode;
 
-            InvokeRepeating(nameof(RefreshRoom), 1.5f, 1.1f);
+            InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"快速加入大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
@@ -242,44 +247,52 @@ public class LobbyManager : UnitySingleton<LobbyManager>
         {
             Lobby lobby = await LobbyService.Instance.GetLobbyAsync(JoinedLobby.Id);
             JoinedLobby = lobby;
+            Debug.Log($"大廳刷新:{JoinedLobby.Players.Count}");
 
             string relayJoinCode = JoinedLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
 
             if (JoinedLobby == null) return;
 
             // Lobby Host更改 Relay重新連接
-            if (_currLobbyHostId != lobby.HostId)
-            {                
-                Debug.Log("Lobby Host更改 Relay重新連接");               
+            if (CurrLobbyHostId != lobby.HostId)
+            {
+                Debug.Log("房主更換!");
+                CurrLobbyHostId = lobby.HostId;
 
                 if (IsLobbyHost())
                 {
-                    /*接收新Lobby Hots*/
+                    IsMigrateLobbyHost = true;
+                    CancelInvoke(nameof(RefreshRoom));
 
                     NetworkManager.Singleton.Shutdown(true);
-                    _currLobbyHostId = lobby.HostId;
                     relayJoinCode = await RelayManager.I.CreateRelay(GameDataManager.MaxPlayer - 1);
+                    CurrRelayJoinCode = relayJoinCode;
+
                     await UpdateLobbyData(new Dictionary<string, DataObject>()
                     {
                         { $"{LobbyPlayerDataKey.RelayJoinCode}", new DataObject(DataObject.VisibilityOptions.Public, relayJoinCode)},
                     });
-                    Debug.Log($"接收新Lobby Hots, 創建Relay: {relayJoinCode}");
-                }
-                else
-                {
-                    if (_currRelayJoinCode != relayJoinCode)
-                    {                        
-                        NetworkManager.Singleton.Shutdown(true);
-                        _currRelayJoinCode = relayJoinCode;
-                        _currLobbyHostId = lobby.HostId;
-                        await RelayManager.I.JoinRelay(relayJoinCode);
-                        Debug.Log($"退出Relay重新連接: {relayJoinCode}");
-                    }
-                }
 
-                // 更新大廳介面
-                LobbyRpcManager.I.UpdateLobbyView();
-            } 
+                    Debug.Log($"更新Lobyy資料:Relay Join Code 更換 {relayJoinCode}");
+
+                    InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+                    Debug.Log($"接收房主, 創建Relay: {relayJoinCode}");
+                }               
+            }
+
+            if (CurrRelayJoinCode != relayJoinCode)
+            {
+                Debug.Log($"Relay更換, {CurrRelayJoinCode} => {relayJoinCode}");
+                IsMigrateLobbyHost = true;
+                CancelInvoke(nameof(RefreshRoom));
+
+                NetworkManager.Singleton.Shutdown(true);
+                await RelayManager.I.JoinRelay(relayJoinCode);
+                CurrRelayJoinCode = relayJoinCode;
+
+                InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+                Debug.Log($"退出Relay重新連接: {relayJoinCode}");
+            }
         }
         catch (LobbyServiceException e)
         {

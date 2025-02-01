@@ -32,7 +32,6 @@ public class LobbyPlayerItem : MonoBehaviour
         Nickname_Txt.text = "";
         LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Waiting to join", (text) =>
         {
-            Prepare_Txt.gameObject.SetActive(true);
             Prepare_Txt.text = text;
         });
     }
@@ -53,6 +52,7 @@ public class LobbyPlayerItem : MonoBehaviour
         Kick_Btn.onClick.AddListener(() =>
         {
             LobbyRpcManager.I.KickLobbyPlayerServerRpc(lobbyPlayerData.NetworkClientId);
+            Kick_Btn.onClick.RemoveAllListeners();
         });
 
         // 靜音按鈕
@@ -69,6 +69,7 @@ public class LobbyPlayerItem : MonoBehaviour
         MigrateHost_Btn.onClick.AddListener(() =>
         {
             LobbyManager.I.MigrateLobbyHost($"{lobbyPlayerData.AuthenticationPlayerId}");
+            MigrateHost_Btn.onClick.RemoveAllListeners();
         });
 
         // 房主標示
@@ -78,17 +79,17 @@ public class LobbyPlayerItem : MonoBehaviour
         Nickname_Txt.text = $"{lobbyPlayerData.Nickname}";
 
         // 準備文字
-        if (lobbyPlayerData.IsPrepare)
+        LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Prepare", (text) =>
         {
-            LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Prepare", (text) =>
+            if (lobbyPlayerData.IsPrepare)
             {
-                Prepare_Txt.gameObject.SetActive(true);
                 Prepare_Txt.text = text;
-            });
-        }
-        else
-        {
-            Prepare_Txt.gameObject.SetActive(false);
-        }
+            }
+            else
+            {
+                Prepare_Txt.text = "";
+            }            
+        });
+        
     }
 }
