@@ -16,3 +16,4 @@ MonoBehaviour:
   PermanentViewList:
   - {fileID: 8623208578387131280, guid: 14451dd3eb3b8794f86bb3db6e2d67ba, type: 3}
   - {fileID: 7406489754698194826, guid: 5db11548212b5fa408c0a667debd0ccd, type: 3}
+  - {fileID: 3410811385822600463, guid: 0d08a3201bf9d204b8ee4aa5a44b4091, type: 3}

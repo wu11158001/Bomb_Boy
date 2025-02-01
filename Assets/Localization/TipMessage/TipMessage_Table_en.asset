@@ -30,6 +30,14 @@ MonoBehaviour:
     m_Localized: Some players are not prepared
     m_Metadata:
       m_Items: []
+  - m_Id: 83062108655616
+    m_Localized: Host is reconnecting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 211569019129856
+    m_Localized: Host disconnection
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

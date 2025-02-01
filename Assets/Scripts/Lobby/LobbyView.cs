@@ -22,9 +22,6 @@ public class LobbyView : MonoBehaviour
     // 大廳玩家項目
     private LobbyPlayerItem[] _lobbyPlayerItem_Array = new LobbyPlayerItem[4];
 
-    // 是否首次進入
-    private bool _isFirstUpdated;
-
     private void Awake()
     {
         ViewManager.I.ResetViewData();
@@ -53,12 +50,17 @@ public class LobbyView : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.K))
         {
-            Debug.Log($"大廳人數:{LobbyManager.I.JoinedLobby.Players.Count}");
+            Debug.Log($"{NetworkManager.Singleton.IsServer}");
         }
 
         if (Input.GetKeyDown(KeyCode.O))
         {
             Debug.LogError(LobbyManager.I.IsLobbyHost());
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.LogError(LobbyManager.I.JoinedLobby.HostId);
         }
     }
 
@@ -70,8 +72,12 @@ public class LobbyView : MonoBehaviour
         // 離開按鈕
         Leave_Btn.onClick.AddListener(() =>
         {
+            if (LobbyManager.I.IsLobbyHost())
+            {
+                LobbyRpcManager.I.HostLeaveLobbyServerRpc();
+            }
             LobbyManager.I.IsSelfLeaveLobby = true;
-            LobbyRpcManager.I.OnLeaveLobby();
+            LobbyRpcManager.I.LeaveLobby();
         });
 
         // 準備 / 開始按鈕
@@ -173,12 +179,11 @@ public class LobbyView : MonoBehaviour
             _lobbyPlayerItem_Array[i].UpdateLobbyPlayerItem(playerData_List[i]);
         }
 
-        if (!_isFirstUpdated && playerData_List.Count > 0)
+        // 所有玩家都已進入大廳
+        if (playerData_List.Count == LobbyManager.I.JoinedLobby.Players.Count)
         {
-            /*首次更新*/
-
-            _isFirstUpdated = true;
             ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
         }        
     }
     

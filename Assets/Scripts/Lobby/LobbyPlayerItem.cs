@@ -68,8 +68,7 @@ public class LobbyPlayerItem : MonoBehaviour
         MigrateHost_Btn.onClick.RemoveAllListeners();
         MigrateHost_Btn.onClick.AddListener(() =>
         {
-            LobbyManager.I.MigrateLobbyHost($"{lobbyPlayerData.AuthenticationPlayerId}");
-            MigrateHost_Btn.onClick.RemoveAllListeners();
+            LobbyRpcManager.I.MigrateHostNotifyServerRpc(lobbyPlayerData.AuthenticationPlayerId);
         });
 
         // 房主標示

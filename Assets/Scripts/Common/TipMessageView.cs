@@ -47,6 +47,6 @@ public class TipMessageView : MonoBehaviour
             yield return null;
         }
 
-        gameObject.SetActive(false);
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.TipMessageView);
     }
 }

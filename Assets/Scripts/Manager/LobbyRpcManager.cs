@@ -35,11 +35,19 @@ public class LobbyRpcManager : NetworkBehaviour
     {
         Debug.Log("退出 Lobby Rpc");
 
-        // 非手動退出大廳 && 非交換房主
         if (!LobbyManager.I.IsSelfLeaveLobby &&
-            !LobbyManager.I.IsMigrateLobbyHost)
+            !LobbyManager.I.IsMigrateLobbyHost && 
+            !LobbyManager.I.IsLobbyHost())
         {
-            LobbyManager.I.LeaveLobby();
+            Debug.Log("Lobby Host斷線，退出大廳");
+            LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "Host disconnection", (text) =>
+            {
+                ViewManager.I.OpenPermanentView<TipMessageView>(PermanentViewEnum.TipMessageView, (view) =>
+                {
+                    view.ShowTipMessage(text);
+                });
+            });
+            LeaveLobby();
         }
 
         NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnect;
@@ -79,13 +87,7 @@ public class LobbyRpcManager : NetworkBehaviour
     /// <param name="networkClientId"></param>
     private void OnClientDisconnect(ulong networkClientId)
     {
-        Debug.Log($"有玩家斷線: {networkClientId} / 本地: {NetworkManager.Singleton.LocalClientId}");
-
-        LobbyPlayerData lobbyPlayerData = GetLobbyPlayerData(networkClientId);
-        if (lobbyPlayerData.NetworkClientId == NetworkManager.Singleton.LocalClientId)
-        {
-            LobbyManager.I.IsMigrateLobbyHost = true;
-        }        
+        Debug.Log($"有玩家斷線: {networkClientId}");
 
         if (IsServer)
         {
@@ -127,18 +129,21 @@ public class LobbyRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RemoveLobbyPlayerServerRpc(ulong networkClientId)
     {
-        if (IsServer)
+        LobbyPlayerData lobbyPlayerData = GetLobbyPlayerData(networkClientId);
+        if (LobbyPlayerData_List.Contains(lobbyPlayerData))
         {
-            LobbyPlayerData lobbyPlayerData = GetLobbyPlayerData(networkClientId);
-            if (LobbyPlayerData_List.Contains(lobbyPlayerData))
+            LobbyPlayerData_List.Remove(lobbyPlayerData);
+            if (!LobbyManager.I.IsMigrateLobbyHost)
             {
-                LobbyPlayerData_List.Remove(lobbyPlayerData);
-                Debug.Log($"移除大廳玩家資料: {networkClientId}");
+                LobbyService.Instance.RemovePlayerAsync(LobbyManager.I.JoinedLobby.Id, $"{lobbyPlayerData.AuthenticationPlayerId}");
+                Debug.Log($"大廳踢出玩家: {networkClientId}");
             }
-            else
-            {
-                Debug.LogError($"移除大廳玩家資料錯誤: {networkClientId}");
-            }
+           
+            Debug.Log($"移除大廳玩家資料: {networkClientId}");
+        }
+        else
+        {
+            Debug.LogError($"移除大廳玩家資料錯誤: {networkClientId}");
         }
     }
 
@@ -161,8 +166,31 @@ public class LobbyRpcManager : NetworkBehaviour
         if (networkClientId == NetworkManager.Singleton.LocalClientId)
         {
             Debug.Log("被踢出大廳");
-            OnLeaveLobby(true);
+            LeaveLobby(true);
         }
+    }
+
+    /// <summary>
+    /// (Server)交換房主通知
+    /// </summary>
+    /// <param name="authenticationPlayerId"></param>
+    [ServerRpc]
+    public void MigrateHostNotifyServerRpc(FixedString64Bytes authenticationPlayerId)
+    {
+        MigrateHostNotifyClientRpc(authenticationPlayerId);
+    }
+
+    /// <summary>
+    /// (Client)交換房主通知
+    /// </summary>
+    /// <param name="authenticationPlayerId"></param>
+    [ClientRpc]
+    private void MigrateHostNotifyClientRpc(FixedString64Bytes authenticationPlayerId)
+    {
+        LobbyManager.I.IsMigrateLobbyHost = true;
+
+        ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
+        LobbyManager.I.MigrateLobbyHost($"{authenticationPlayerId}");
     }
 
     /// <summary>
@@ -269,10 +297,28 @@ public class LobbyRpcManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// (Server)Host離開大廳
+    /// </summary>
+    [ServerRpc(RequireOwnership = false)]
+    public void HostLeaveLobbyServerRpc()
+    {
+        HostLeaveLobbyClientRpc();
+    }
+
+    /// <summary>
+    /// (Client)Host離開大廳
+    /// </summary>
+    [ClientRpc]
+    private void HostLeaveLobbyClientRpc()
+    {
+        LobbyManager.I.IsMigrateLobbyHost = true;
+    }
+
+    /// <summary>
     /// 離開大廳
     /// </summary>
     /// <param name="isKicked">是否是被踢出</param>
-    public async void OnLeaveLobby(bool isKicked = false)
+    public async void LeaveLobby(bool isKicked = false)
     {       
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
 

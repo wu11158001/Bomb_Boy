@@ -68,6 +68,8 @@ public enum PermanentViewEnum
     LoadingView = 0,
     // 提示訊息介面
     TipMessageView,
+    // 主機重連等待介面
+    ReconnectView,
 }
 #endregion
 

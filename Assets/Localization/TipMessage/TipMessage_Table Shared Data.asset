@@ -27,6 +27,14 @@ MonoBehaviour:
     m_Key: Some players are not prepared
     m_Metadata:
       m_Items: []
+  - m_Id: 83062108655616
+    m_Key: Host is reconnecting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 211569019129856
+    m_Key: Host disconnection
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
