@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.Netcode;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
 
 public class LobbyPlayerItem : MonoBehaviour
 {
@@ -12,11 +14,16 @@ public class LobbyPlayerItem : MonoBehaviour
     [SerializeField] TextMeshProUGUI Nickname_Txt;
     [SerializeField] TextMeshProUGUI Prepare_Txt;
 
+    // Lobby玩家編號
+    private int _playerIndex;
+
     /// <summary>
     /// 初始化大廳玩家項目
     /// </summary>
-    public void InitializeLobbyPlayerItem()
+    public void InitializeLobbyPlayerItem(int playerIndex)
     {
+        _playerIndex = playerIndex;
+
         Kick_Btn.gameObject.SetActive(false);
         Mute_Tog.gameObject.SetActive(false);
         MigrateHost_Btn.gameObject.SetActive(false);
@@ -25,6 +32,7 @@ public class LobbyPlayerItem : MonoBehaviour
         Nickname_Txt.text = "";
         LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Waiting to join", (text) =>
         {
+            Prepare_Txt.gameObject.SetActive(true);
             Prepare_Txt.text = text;
         });
     }
@@ -35,12 +43,17 @@ public class LobbyPlayerItem : MonoBehaviour
     /// <param name="lobbyPlayerData"></param>
     public void UpdateLobbyPlayerItem(LobbyPlayerData lobbyPlayerData)
     {
-        bool isGameHost = lobbyPlayerData.IsGameHost;
-        bool isLocalHost = NetworkManager.Singleton.IsHost;
+        bool isLobbyHost = LobbyManager.I.JoinedLobby.HostId == lobbyPlayerData.AuthenticationPlayerId;
+        bool isLocalHost = LobbyManager.I.IsLobbyHost();
         bool isLocal = lobbyPlayerData.NetworkClientId == NetworkManager.Singleton.LocalClientId;
 
         // 踢除按鈕
         Kick_Btn.gameObject.SetActive(isLocalHost && !isLocal);
+        Kick_Btn.onClick.RemoveAllListeners();
+        Kick_Btn.onClick.AddListener(() =>
+        {
+            LobbyRpcManager.I.KickLobbyPlayerServerRpc(lobbyPlayerData.NetworkClientId);
+        });
 
         // 靜音按鈕
         Mute_Tog.gameObject.SetActive(!isLocal);
@@ -55,10 +68,11 @@ public class LobbyPlayerItem : MonoBehaviour
         MigrateHost_Btn.onClick.RemoveAllListeners();
         MigrateHost_Btn.onClick.AddListener(() =>
         {
+            LobbyManager.I.MigrateLobbyHost($"{lobbyPlayerData.AuthenticationPlayerId}");
         });
 
         // 房主標示
-        Host_Obj.SetActive(isGameHost);
+        Host_Obj.SetActive(isLobbyHost);
 
         // 暱稱文字
         Nickname_Txt.text = $"{lobbyPlayerData.Nickname}";

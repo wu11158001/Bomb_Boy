@@ -87,12 +87,13 @@ public class ViewManager : UnitySingleton<ViewManager>
         if (_recodePermanetView.ContainsKey(permanentView))
         {
             _recodePermanetView[permanentView].gameObject.SetActive(true);
+            ActionCallback(_recodePermanetView[permanentView], callback);
         }
         else
         {
             GameObject viewObj = SOManager.I.View_SO.PermanentViewList[(int)permanentView];
             RectTransform view = Instantiate(viewObj, PermanentCanvasRt).GetComponent<RectTransform>();
-            CreateViewHandle<RectTransform>(view, PermanentCanvasRt);
+            CreateViewHandle<T>(view, PermanentCanvasRt, callback);
 
             _recodePermanetView.Add(permanentView, view);
         }

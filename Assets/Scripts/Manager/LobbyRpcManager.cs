@@ -1,6 +1,13 @@
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+using Unity.Services.Lobbies;
+using Unity.Services.Lobbies.Models;
+using Newtonsoft.Json;
+using Unity.Collections;
+using System.Threading.Tasks;
+using Unity.Services.Authentication;
 
 public class LobbyRpcManager : NetworkBehaviour
 {
@@ -8,9 +15,12 @@ public class LobbyRpcManager : NetworkBehaviour
     public static LobbyRpcManager I { get { return _instance; } }
 
     public NetworkList<LobbyPlayerData> LobbyPlayerData_List { get; private set; }
-        = new(null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+        = new(null, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private LobbyView _lobbyView;
+
+    // 發出交換房主指令玩家Id
+    private ulong _migrateNetworkClientId;
 
     private void Awake()
     {
@@ -32,21 +42,24 @@ public class LobbyRpcManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        if (NetworkManager.Singleton.IsServer)
-        {
-            LobbyPlayerData_List.Clear();
-        }
+        Debug.Log("加入 Lobby Rpc");
 
         // 事件註冊
         NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnect;
         LobbyPlayerData_List.OnListChanged += OnLobbyPlayerDataChange;
 
+        if (IsServer)
+        {
+            LobbyPlayerData_List.Clear();
+        }
+
         // 新增大廳玩家
-        AddLobbyPlayerServerRpc(new()
+        AddLobbyPlayerServerRpc(new LobbyPlayerData()
         {
             NetworkClientId = NetworkManager.Singleton.LocalClientId,
+            AuthenticationPlayerId = AuthenticationService.Instance.PlayerId,
+            JoinLobbyId = AuthenticationService.Instance.PlayerId,
             Nickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY),
-            IsGameHost = NetworkManager.Singleton.IsHost,
             IsPrepare = false,
         });
     }
@@ -59,21 +72,15 @@ public class LobbyRpcManager : NetworkBehaviour
     {
         Debug.Log($"有玩家斷線: {networkClientId}");
 
-        RemoveLobbyPlayerServerRpc(networkClientId);
-
         if (IsServer)
         {
+            RemoveLobbyPlayerServerRpc(networkClientId);
+
             if (SceneManager.GetActiveScene().name == $"{SceneEnum.Game}")
             {
                 // 判斷遊戲結果
                 GameRpcManager.I.JudgeGameResultServerRpc();
             }
-        }
-
-        if (NetworkManager.Singleton.LocalClientId == networkClientId)
-        {
-            /*離開的是本地端*/
-            return;
         }
     }
 
@@ -83,12 +90,8 @@ public class LobbyRpcManager : NetworkBehaviour
     /// <param name="changeEvent"></param>
     private void OnLobbyPlayerDataChange(NetworkListEvent<LobbyPlayerData> changeEvent)
     {
-        // 大廳更新
-        CheckLobbyView();
-        if (_lobbyView != null && _lobbyView.gameObject.activeSelf)
-        {
-            _lobbyView.UpdateListPlayerItem();
-        }
+        // 更新大廳介面
+        UpdateLobbyView();
     }
 
     /// <summary>
@@ -98,7 +101,7 @@ public class LobbyRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void AddLobbyPlayerServerRpc(LobbyPlayerData newPlayer)
     {
-        Debug.Log($"新增房間玩家: {newPlayer.NetworkClientId}");
+        Debug.Log($"新增房間玩家: {newPlayer.NetworkClientId} / 暱稱: {newPlayer.Nickname}");
         LobbyPlayerData_List.Add(newPlayer);
     }
 
@@ -109,19 +112,41 @@ public class LobbyRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership = false)]
     public void RemoveLobbyPlayerServerRpc(ulong networkClientId)
     {
-        if (NetworkManager.Singleton.IsServer)
+        if (IsServer)
         {
-            for (int i = LobbyPlayerData_List.Count - 1; i >= 0; i--)
+            LobbyPlayerData lobbyPlayerData = GetLobbyPlayerData(networkClientId);
+            if (LobbyPlayerData_List.Contains(lobbyPlayerData))
             {
-                if (LobbyPlayerData_List[i].NetworkClientId == networkClientId)
-                {
-                    Debug.Log($"移除大廳玩家 {networkClientId}");
-                    LobbyPlayerData_List.Remove(LobbyPlayerData_List[i]);
-                    return;
-                }
+                LobbyPlayerData_List.Remove(lobbyPlayerData);
+                Debug.Log($"移除大廳玩家資料: {networkClientId}");
             }
+            else
+            {
+                Debug.LogError($"移除大廳玩家資料錯誤: {networkClientId}");
+            }
+        }
+    }
 
-            Debug.LogError($"移除大廳玩家錯誤: {networkClientId}");
+    /// <summary>
+    /// (Server)踢除玩家
+    /// </summary>
+    /// <param name="networkClientId"></param>
+    [ServerRpc]
+    public void KickLobbyPlayerServerRpc(ulong networkClientId)
+    {
+        KickLobbyPlayerClientRpc(networkClientId);
+    }
+
+    /// <summary>
+    /// (Client)踢除玩家
+    /// </summary>
+    [ClientRpc]
+    private void KickLobbyPlayerClientRpc(ulong networkClientId)
+    {
+        if (networkClientId == NetworkManager.Singleton.LocalClientId)
+        {
+            Debug.Log("被踢出大廳");
+            OnLeaveLobby(true);
         }
     }
 
@@ -214,5 +239,40 @@ public class LobbyRpcManager : NetworkBehaviour
                 _lobbyView = lobbyViewObj.GetComponent<LobbyView>();
             }
         }
+    }
+
+    /// <summary>
+    /// 更新大廳介面
+    /// </summary>
+    public void UpdateLobbyView()
+    {
+        CheckLobbyView();
+        if (_lobbyView != null && _lobbyView.gameObject.activeSelf)
+        {
+            _lobbyView.UpdateListPlayerItem();
+        }
+    }
+
+    /// <summary>
+    /// 離開大廳
+    /// </summary>
+    /// <param name="isKicked">是否是被踢出</param>
+    public async void OnLeaveLobby(bool isKicked = false)
+    {       
+        ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+
+        if (isKicked)
+        {
+            LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "Kicked out of the lobby", (text) =>
+            {
+                ViewManager.I.OpenPermanentView<TipMessageView>(PermanentViewEnum.TipMessageView, (view) =>
+                {
+                    view.ShowTipMessage(text);
+                });
+            });
+        }
+
+        await LobbyManager.I.LeaveLobby();
+        ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
     }
 }

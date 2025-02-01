@@ -6,40 +6,46 @@ using UnityEngine;
 /// <summary>
 /// 大廳玩家資料
 /// </summary>
+[Serializable]
 public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData>
 {
     // Network Id
     public ulong NetworkClientId;
+    // 登入Id
+    public FixedString64Bytes AuthenticationPlayerId;
+    // Join Lobby Id
+    public FixedString64Bytes JoinLobbyId;
     // 暱稱
     public FixedString64Bytes Nickname;
     // 準備狀態
     public bool IsPrepare;
-    // 是否是室長
-    public bool IsGameHost;
    
     public bool Equals(LobbyPlayerData other)
     {
         return NetworkClientId.Equals(other.NetworkClientId) &&
+               AuthenticationPlayerId.Equals(other.AuthenticationPlayerId) &&
+               JoinLobbyId.Equals(other.JoinLobbyId) &&
                Nickname.Equals(other.Nickname) &&
-               IsPrepare == other.IsPrepare &&
-               IsGameHost == other.IsGameHost;
+               IsPrepare == other.IsPrepare;
     }
 
     public override int GetHashCode()
     {
         return HashCode.Combine(
             NetworkClientId,
+            AuthenticationPlayerId,
+            JoinLobbyId,
             Nickname,
-            IsPrepare,
-            IsGameHost);
+            IsPrepare);
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref NetworkClientId);
+        serializer.SerializeValue(ref AuthenticationPlayerId);
+        serializer.SerializeValue(ref JoinLobbyId);
         serializer.SerializeValue(ref Nickname);
         serializer.SerializeValue(ref IsPrepare);
-        serializer.SerializeValue(ref IsGameHost);
     }
 }
 

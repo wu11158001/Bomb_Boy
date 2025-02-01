@@ -34,10 +34,12 @@ public class LobbyView : MonoBehaviour
         // 產生大廳玩家項目
         for (int i = 0; i < 4; i++)
         {
+            int playerIndex = i;
+
             GameObject itemObj = Instantiate(LobbyPlayerItemSample, LobbyPlayerArea);
             itemObj.SetActive(true);
             LobbyPlayerItem lobbyPlayerItem = itemObj.GetComponent<LobbyPlayerItem>();
-            lobbyPlayerItem.InitializeLobbyPlayerItem();
+            lobbyPlayerItem.InitializeLobbyPlayerItem(playerIndex);
             _lobbyPlayerItem_Array[i] = lobbyPlayerItem;
         }
         LobbyPlayerItemSample.SetActive(false);
@@ -46,17 +48,28 @@ public class LobbyView : MonoBehaviour
         UpdateListPlayerItem();
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            UpdateListPlayerItem();
+        }
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            Debug.LogError(LobbyManager.I.IsLobbyHost());
+        }
+    }
+
     /// <summary>
     /// 事件聆聽
     /// </summary>
     private void EventListener()
     {
         // 離開按鈕
-        Leave_Btn.onClick.AddListener(async () =>
+        Leave_Btn.onClick.AddListener(() =>
         {
-            ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
-            await LobbyManager.I.LeaveLobby();
-            ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
+            LobbyRpcManager.I.OnLeaveLobby();
         });
 
         // 準備 / 開始按鈕
@@ -68,17 +81,25 @@ public class LobbyView : MonoBehaviour
                 {
                     /*是Host*/
 
-                    /*if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    if (NetworkManager.Singleton.ConnectedClients.Count < 2)
                     {
                         Debug.Log("遊戲人數未滿2人");
+                        LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "The number of players is less than 2", (text) =>
+                        {
+                            ViewManager.I.OpenPermanentView<TipMessageView>(PermanentViewEnum.TipMessageView, (view) =>
+                            {
+                                view.ShowTipMessage(text);
+                            });
+                        });
+                        
                         return;
-                    }*/
+                    }
 
                     bool isAllPrepare = true;
                     foreach (var playerData in LobbyRpcManager.I.LobbyPlayerData_List)
                     {
                         if (playerData.IsPrepare == false &&
-                            !playerData.IsGameHost)
+                            !LobbyManager.I.IsLobbyHost())
                         {
                             isAllPrepare = false;
                             break;
@@ -129,9 +150,11 @@ public class LobbyView : MonoBehaviour
         });
 
         // 大廳玩家項目初始化
+        int playerIndex = 0;
         foreach (var lobbyPlayerItem in _lobbyPlayerItem_Array)
         {
-            lobbyPlayerItem.InitializeLobbyPlayerItem();
+            lobbyPlayerItem.InitializeLobbyPlayerItem(playerIndex);
+            playerIndex++;
         }
 
         // 設置大廳玩家項目資料

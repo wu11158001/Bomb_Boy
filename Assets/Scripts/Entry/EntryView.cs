@@ -9,6 +9,7 @@ using Unity.Services.Authentication;
 using System.Threading.Tasks;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
+using Unity.Netcode;
 
 public class EntryView : MonoBehaviour
 {

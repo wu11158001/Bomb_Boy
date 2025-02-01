@@ -50,6 +50,14 @@ MonoBehaviour:
     m_Localized: Winning Player
     m_Metadata:
       m_Items: []
+  - m_Id: 1145673457799168
+    m_Localized: Mobile Control
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1145767976439808
+    m_Localized: Planting the Bomb
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds: []

@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GameDataManager : UnitySingleton<GameDataManager>
 {
+    // 最大遊戲人數
+    public const int MaxPlayer = 4;
     // 產生場景物件偏移量
     public readonly Vector3 CreateSceneObjectOffset = new(0.4f, 0, -0.4f);
     // 射線Size
