@@ -35,45 +35,6 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     }
 
     /// <summary>
-    /// Host斷線重新創建新大廳
-    /// </summary>
-    /// <returns></returns>
-    public async Task<Lobby> HostDisconnectCreateNewLobby()
-    {
-        try
-        {
-            // 本地玩家暱稱
-            string recodeNickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY);
-            // 本地玩家Id
-            string id = AuthenticationService.Instance.PlayerId;
-
-            // 創建Relay
-            string relayJoinCode = await RelayManager.I.CreateRelay(GameDataManager.MaxPlayer - 1);
-            CurrRelayJoinCode = relayJoinCode;
-
-            // 創建Lobby
-            CreateLobbyOptions createLobbyOptions = new()
-            {
-                Data = new Dictionary<string, DataObject>()
-                {
-                    // Relay加入代碼
-                    { $"{LobbyPlayerDataKey.RelayJoinCode}", new DataObject(DataObject.VisibilityOptions.Public, relayJoinCode)},
-                    // 房間狀態
-                    { $"{LobbyDataKey.State}", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyDataKey.In_Team}", DataObject.IndexOptions.S1)},
-                },
-            };
-
-            Debug.Log("Host斷線重新創建新大廳");
-            return await LobbyService.Instance.CreateLobbyAsync(id, GameDataManager.MaxPlayer, createLobbyOptions);
-        }
-        catch (LobbyServiceException e)
-        {
-            Debug.LogError($"創建大廳錯誤: {e}");
-            return null;
-        }
-    }
-
-    /// <summary>
     /// 創建大廳
     /// </summary>
     /// <returns></returns>
@@ -286,7 +247,6 @@ public class LobbyManager : UnitySingleton<LobbyManager>
         {
             Lobby lobby = await LobbyService.Instance.GetLobbyAsync(JoinedLobby.Id);
             JoinedLobby = lobby;
-            Debug.Log($"{JoinedLobby.Players.Count} / {LobbyRpcManager.I.LobbyPlayerData_List.Count}");
             string relayJoinCode = JoinedLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
 
             if (JoinedLobby == null) return;

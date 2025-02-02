@@ -92,12 +92,6 @@ public class LobbyRpcManager : NetworkBehaviour
         if (IsServer)
         {
             RemoveLobbyPlayerServerRpc(networkClientId);
-
-            if (SceneManager.GetActiveScene().name == $"{SceneEnum.Game}")
-            {
-                // 判斷遊戲結果
-                GameRpcManager.I.JudgeGameResultServerRpc();
-            }
         }
     }
 

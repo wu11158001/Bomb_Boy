@@ -37,6 +37,8 @@ public class CharacterControl : BaseNetworkObject
 
     // 是否已首次更新資料
     private bool _isFirstUpdateData;
+    // 是否該角色玩家已斷線
+    private bool _isLocalDixconnect;
 
     private void Start()
     {
@@ -65,11 +67,17 @@ public class CharacterControl : BaseNetworkObject
         }
     }
 
+    protected override void OnOwnershipChanged(ulong previous, ulong current)
+    {
+        _isLocalDixconnect = true;
+    }
+
     private void Update()
     {
         if (!IsOwner) return;
         if (_isDie) return;
         if (_isStopAction) return;
+        if (_isLocalDixconnect) return;
 
         _movement = Vector3.zero;
 
@@ -85,6 +93,7 @@ public class CharacterControl : BaseNetworkObject
     private void FixedUpdate()
     {
         if (_isDie) return;
+        if (_isLocalDixconnect) return;
 
         if (_movement != Vector3.zero)
         {
@@ -112,6 +121,7 @@ public class CharacterControl : BaseNetworkObject
     {
         if (!IsOwner) return;
         if (_isDie) return;
+        if (_isLocalDixconnect) return;
 
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Ground}"))
         {
@@ -172,18 +182,12 @@ public class CharacterControl : BaseNetworkObject
     /// <summary>
     /// 設置暱稱文字
     /// </summary>
-    /// <param name="nickanem"></param>
-    public void SetNicknameText(string nickanem)
+    /// <param name="nickname"></param>
+    public void SetNicknameText(string nickname)
     {
-        string color =
-            IsOwner ?
-            "F6BF23" :
-            "D53C2B";
-        string nicknameStr = $"<color=#{color}>{nickanem}</color>";
-
         GameObject characterNicknameObj = SOManager.I.NormalObject_SO.GameObjectList[0];
-        CharacterNickname characterNickname = Instantiate(characterNicknameObj).GetComponent<CharacterNickname>();
-        characterNickname.SetFollowCharacter(transform, nicknameStr);
+        CharacterNickname characterNickname = Instantiate(characterNicknameObj, ViewManager.I.CurrSceneCanvasRt).GetComponent<CharacterNickname>();
+        characterNickname.SetFollowCharacter(transform, nickname, IsOwner);
     }
 
     /// <summary>
@@ -213,7 +217,11 @@ public class CharacterControl : BaseNetworkObject
         if (IsOwner)
         {
             GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
-            cameraFollow.OnLoccalDie();
+
+            if (!_isLocalDixconnect)
+            {
+                cameraFollow.OnLoccalDie();
+            }            
         }
     }
 }

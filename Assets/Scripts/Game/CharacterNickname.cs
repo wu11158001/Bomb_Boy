@@ -1,27 +1,28 @@
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class CharacterNickname : MonoBehaviour
 {
-    private TextMeshPro _thisTextMeshPro;
+    [SerializeField] Vector3 _offset;
+    [SerializeField] float smoothSpeed;
+
+    private TextMeshProUGUI _thisTextMeshPro;
     private Transform _target;
-    private readonly Vector3 _offset = new(0, 2.5f, -0.8f);
+    private Camera _mainCamera;
 
     private void Awake()
     {
-        _thisTextMeshPro = GetComponent<TextMeshPro>();
+        _thisTextMeshPro = GetComponent<TextMeshProUGUI>();
+        _mainCamera = Camera.main;
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        if (_target != null)
+        if (_target != null && _thisTextMeshPro != null)
         {
-            transform.position = _target.position + _offset;
-
-            if (_target == null || !_target.gameObject.activeSelf)
-            {
-                Destroy(gameObject);
-            }
+            Vector3 screenPos = _mainCamera.WorldToScreenPoint(_target.position + _offset);
+            _thisTextMeshPro.transform.position = Vector3.Lerp(_thisTextMeshPro.transform.position, screenPos, smoothSpeed);
         }
         else
         {
@@ -34,9 +35,23 @@ public class CharacterNickname : MonoBehaviour
     /// </summary>
     /// <param name="character"></param>
     /// <param name="nickname"></param>
-    public void SetFollowCharacter(Transform character, string nickname)
+    /// <param name="nickname"></param>
+    public void SetFollowCharacter(Transform character, string nickname, bool isOwner)
     {
         _target = character;
-        _thisTextMeshPro.text = nickname;
+
+        // 暱稱顏色
+        string nicknameColor =
+            isOwner ?
+            "F6BF23" :
+            "D53C2B";
+
+        // 暱稱文字
+        string takeNickname =
+            nickname.Length > 6 ?
+            $"{new string(nickname.Take(6).ToArray())}..." :
+            nickname;
+
+        _thisTextMeshPro.text = $"<color=#{nicknameColor}>{takeNickname}</color>"; ;
     }
 }

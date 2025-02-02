@@ -426,6 +426,35 @@ public class GameRpcManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// 回到大廳倒數
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator IReturnToLobbyCD()
+    {
+        if (!IsServer) yield break;
+
+        yield return new WaitForSeconds(2);
+
+        for (int i = 4; i >= 0; i--)
+        {
+            ReturnToLobbyCDClientRpc(i);
+            yield return new WaitForSeconds(1);
+        }
+
+        // 更新房間狀態
+        yield return LobbyManager.I.UpdateLobbyData(new Dictionary<string, DataObject>()
+        {
+            {$"{LobbyDataKey.State}", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyDataKey.In_Team}", DataObject.IndexOptions.S1) },
+        });
+
+        // 重製房間玩家
+        LobbyRpcManager.I.ResetLobbyPlayerDataServerRpc();
+
+        // 返回大廳
+        ChangeSceneManager.I.ChangeScene_Network(SceneEnum.Lobby);
+    }
+
+    /// <summary>
     /// (Client)開始遊戲倒數
     /// </summary>
     /// <param name="num"></param>
@@ -475,35 +504,6 @@ public class GameRpcManager : NetworkBehaviour
         }
 
         GameStartClientRpc();
-    }
-
-    /// <summary>
-    /// 回到大廳倒數
-    /// </summary>
-    /// <returns></returns>
-    private IEnumerator IReturnToLobbyCD()
-    {
-        if (!IsServer) yield break;
-
-        yield return new WaitForSeconds(2);
-
-        for (int i = 3; i >= 0; i--)
-        {
-            ReturnToLobbyCDClientRpc(i);
-            yield return new WaitForSeconds(1);
-        }
-
-        // 更新房間狀態
-        yield return LobbyManager.I.UpdateLobbyData(new Dictionary<string, DataObject>()
-        {
-            {$"{LobbyDataKey.State}", new DataObject(DataObject.VisibilityOptions.Public, $"{LobbyDataKey.In_Team}", DataObject.IndexOptions.S1) },
-        });
-
-        // 重製房間玩家
-        LobbyRpcManager.I.ResetLobbyPlayerDataServerRpc();
-
-        // 返回大廳
-        ChangeSceneManager.I.ChangeScene_Network(SceneEnum.Lobby);
     }
 
     /// <summary>

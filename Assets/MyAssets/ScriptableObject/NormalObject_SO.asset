@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: NormalObject_SO
   m_EditorClassIdentifier: 
   GameObjectList:
-  - {fileID: 1854569928511765055, guid: bc3260d4eb0113e4fac57d73667ce792, type: 3}
+  - {fileID: 6848380371715294070, guid: bc3260d4eb0113e4fac57d73667ce792, type: 3}
