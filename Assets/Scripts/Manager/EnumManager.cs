@@ -55,8 +55,8 @@ public enum SceneEnum
 // 一般介面
 public enum ViewEnum
 {
-    // 大廳
-    LobbyView,
+    // 詢問介面
+    AskView,
 }
 
 /// <summary>
@@ -108,5 +108,6 @@ public enum LocalizationTableEnum
     Lobby_Table,                    // 大廳
     Game_Table,                     // 遊戲
     TipMessage_Table,               // 提示訊息
+    Ask_Table,                      // 詢問內容
 }
 #endregion

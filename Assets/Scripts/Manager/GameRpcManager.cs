@@ -91,6 +91,25 @@ public class GameRpcManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// (Server)斷線重連
+    /// </summary>
+    /// <param name="gamePlayerData"></param>
+    /// <param name="networkClientId"></param>
+    [ServerRpc(RequireOwnership = false)]
+    public void ReconnectServerRpc(GamePlayerData gamePlayerData, ulong networkClientId)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(gamePlayerData.CharacterId, out NetworkObject networkObject))
+        {
+            Debug.Log("斷線重連，角色存在");
+            networkObject.ChangeOwnership(networkClientId);
+        }
+        else
+        {
+            Debug.Log("斷線重連，角色不存在");
+        }
+    }
+
+    /// <summary>
     /// (Server)進入遊戲
     /// </summary>
     /// <param name="networkClientId"></param>
@@ -120,7 +139,7 @@ public class GameRpcManager : NetworkBehaviour
         // 初始化玩家資料
         GamePlayerData gamePlayerData = new()
         {
-            NetworkClientId = LobbyRpcManager.I.LobbyPlayerData_List[index].NetworkClientId,
+            AuthenticationPlayerId = LobbyRpcManager.I.LobbyPlayerData_List[index].AuthenticationPlayerId,
             CharacterId = networkObject.NetworkObjectId,
             Nickname = LobbyRpcManager.I.LobbyPlayerData_List[index].Nickname,
             BombCount = 2,

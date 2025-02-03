@@ -29,6 +29,8 @@ public class LobbyView : MonoBehaviour
 
     private void Start()
     {
+        PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_JOIN_LOBBY_ID, "");
+
         // 產生大廳玩家項目
         for (int i = 0; i < 4; i++)
         {
@@ -89,7 +91,7 @@ public class LobbyView : MonoBehaviour
                 {
                     /*是Host*/
 
-                    if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    /*if (NetworkManager.Singleton.ConnectedClients.Count < 2)
                     {
                         Debug.Log("遊戲人數未滿2人");
                         LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "The number of players is less than 2", (text) =>
@@ -101,7 +103,7 @@ public class LobbyView : MonoBehaviour
                         });
                         
                         return;
-                    }
+                    }*/
 
                     bool isAllPrepare = true;
                     foreach (var playerData in LobbyRpcManager.I.LobbyPlayerData_List)

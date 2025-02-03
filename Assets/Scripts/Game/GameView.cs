@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using System.Collections;
 using System;
+using Unity.Services.Authentication;
 
 public class GameView : MonoBehaviour
 {
@@ -21,7 +22,29 @@ public class GameView : MonoBehaviour
 
     private void Start()
     {
-        GameRpcManager.I.InGameSceneServerRpc(NetworkManager.Singleton.LocalClientId);
+        bool isHaveedData = false;
+        GamePlayerData gamePlayerData = new();
+        for (int i = 0; i < GameRpcManager.I.GamePlayerData_List.Count; i++)
+        {
+            if (GameRpcManager.I.GamePlayerData_List[i].AuthenticationPlayerId == AuthenticationService.Instance.PlayerId)
+            {
+                isHaveedData = true;
+                gamePlayerData = GameRpcManager.I.GamePlayerData_List[i];
+                break;
+            }
+        }
+
+        if (isHaveedData == false)
+        {
+            /*初入遊戲*/
+            GameRpcManager.I.InGameSceneServerRpc(NetworkManager.Singleton.LocalClientId);
+        }
+        else
+        {
+            /*斷線重連*/
+            GameRpcManager.I.ReconnectServerRpc(gamePlayerData, NetworkManager.Singleton.LocalClientId);
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        }        
 
         ExitGame_Btn.gameObject.SetActive(false);
         GameResult_Txt.gameObject.SetActive(false);
@@ -31,6 +54,9 @@ public class GameView : MonoBehaviour
         InputController_Obj.SetActive(true);
 
         EventListener();
+
+        // 紀錄斷線重連資料
+        PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_JOIN_LOBBY_ID, LobbyManager.I.JoinedLobby.Id);
     }
 
     /// <summary>
@@ -86,7 +112,7 @@ public class GameView : MonoBehaviour
         {
             /*有玩家獲勝*/
 
-            bool isVictory = winnerData.NetworkClientId == NetworkManager.Singleton.LocalClientId;
+            bool isVictory = winnerData.AuthenticationPlayerId == AuthenticationService.Instance.PlayerId;
             string resultStr =
                 isVictory ?
                 $"Victory" :

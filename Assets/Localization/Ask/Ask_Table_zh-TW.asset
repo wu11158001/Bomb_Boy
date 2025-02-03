@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: Ask_Table_zh-TW
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: zh-TW
+  m_SharedData: {fileID: 11400000, guid: 530650297692a8d45a392d40294db34e, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 4697296896
+    m_Localized: "\u6709\u672A\u5B8C\u6210\u7684\u904A\u6232\uFF0C\u662F\u5426\u9032\u5165?"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 828081115136
+    m_Localized: "\u78BA\u8A8D"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 874184904704
+    m_Localized: "\u53D6\u6D88"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

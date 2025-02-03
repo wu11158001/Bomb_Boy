@@ -35,6 +35,41 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     }
 
     /// <summary>
+    /// 斷線重連查詢大廳
+    /// </summary>
+    /// <param name="lobbyId"></param>
+    /// <returns></returns>
+    public async Task<Lobby> ReconnectQueryLobby(string lobbyId)
+    {
+        try
+        {
+            QueryLobbiesOptions queryLobbiesOptions = new()
+            {
+                Filters = new List<QueryFilter>()
+                {
+                    {new QueryFilter( QueryFilter.FieldOptions.S1, $"{LobbyDataKey.In_Game}", QueryFilter.OpOptions.EQ) },
+                },
+            };
+
+            QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
+            for (int i = 0; i < queryResponse.Results.Count; i++)
+            {
+                if (queryResponse.Results[i].Id == lobbyId)
+                {
+                    return queryResponse.Results[i];
+                }
+            }
+
+            return null;
+        }
+        catch (LobbyServiceException e)
+        {
+            Debug.LogError($"查詢大廳錯誤: {e}");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// 創建大廳
     /// </summary>
     /// <returns></returns>

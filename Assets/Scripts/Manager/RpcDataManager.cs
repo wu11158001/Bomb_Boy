@@ -11,7 +11,7 @@ public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData
 {
     // Network Id
     public ulong NetworkClientId;
-    // 登入Id
+    // 玩家登入Id
     public FixedString64Bytes AuthenticationPlayerId;
     // Join Lobby Id
     public FixedString64Bytes JoinLobbyId;
@@ -54,8 +54,8 @@ public struct LobbyPlayerData : INetworkSerializable, IEquatable<LobbyPlayerData
 /// </summary>
 public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
 {
-    // Network Id
-    public ulong NetworkClientId;
+    // 玩家登入Id
+    public FixedString64Bytes AuthenticationPlayerId;
     // 角色物件Id
     public ulong CharacterId;
     // 角色暱稱
@@ -73,7 +73,7 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
 
     public bool Equals(GamePlayerData other)
     {
-        return NetworkClientId.Equals(other.NetworkClientId) &&
+        return AuthenticationPlayerId.Equals(other.AuthenticationPlayerId) &&
                CharacterId == other.CharacterId &&
                Nickname.Equals(other.Nickname) &&
                BombCount == other.BombCount &&
@@ -86,7 +86,7 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
     public override int GetHashCode()
     {
         return HashCode.Combine(
-            NetworkClientId,
+            AuthenticationPlayerId,
             CharacterId,
             Nickname,
             BombCount,
@@ -98,7 +98,7 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
-        serializer.SerializeValue(ref NetworkClientId);
+        serializer.SerializeValue(ref AuthenticationPlayerId);
         serializer.SerializeValue(ref CharacterId);
         serializer.SerializeValue(ref Nickname);
         serializer.SerializeValue(ref BombCount);
@@ -106,5 +106,30 @@ public struct GamePlayerData : INetworkSerializable, IEquatable<GamePlayerData>
         serializer.SerializeValue(ref MoveSpeed);
         serializer.SerializeValue(ref IsDie);
         serializer.SerializeValue(ref IsStopAction);
+    }
+}
+
+/// <summary>
+/// 遊戲地形資料
+/// </summary>
+public struct GameTerrainData : INetworkSerializable, IEquatable<GameTerrainData>
+{
+    // 已移除的可擊破物件Id
+    public ulong RemoveBreakObstacleId;
+
+    public bool Equals(GameTerrainData other)
+    {
+        return RemoveBreakObstacleId.Equals(other.RemoveBreakObstacleId);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(
+            RemoveBreakObstacleId);
+    }
+
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref RemoveBreakObstacleId);
     }
 }

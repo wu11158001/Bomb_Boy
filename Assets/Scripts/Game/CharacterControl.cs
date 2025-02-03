@@ -14,17 +14,6 @@ public class CharacterControl : BaseNetworkObject
     private Vector3 _movement;
     private Animator _animator;
 
-    // 炸彈數量
-    private int _bombCount;
-    // 爆炸等級
-    private int _explotionLevel;
-    // 移動速度
-    private float _moveSpeed;
-    // 死亡狀態
-    private bool _isDie;
-    // 停止行為
-    private bool _isStopAction;
-
     // 轉向速度
     private float _turnSpeed = 15f;        
     // 動畫Hash_是否移動
@@ -39,6 +28,8 @@ public class CharacterControl : BaseNetworkObject
     private bool _isFirstUpdateData;
     // 是否該角色玩家已斷線
     private bool _isLocalDixconnect;
+
+    private GamePlayerData _gamePlayerData;
 
     private void Start()
     {
@@ -58,25 +49,29 @@ public class CharacterControl : BaseNetworkObject
         base.OnNetworkSpawn();
 
         TagObj.SetActive(IsOwner);
-
-        if (IsOwner)
-        {
-            // 設置攝影機跟隨
-            cameraFollow = Camera.main.GetComponent<CameraFollow>();
-            cameraFollow.Target = transform;
-        }
+        SetCameraFollow();
+        SetNicknameText($"{_gamePlayerData.Nickname}");
     }
 
     protected override void OnOwnershipChanged(ulong previous, ulong current)
     {
-        _isLocalDixconnect = true;
+        Debug.Log($"角色 {thisObjectId} 擁有權更改: {previous} => {current}");
+        _isLocalDixconnect = IsServer;
+        if (!IsServer && IsOwner)
+        {            
+            SetCameraFollow();
+            _gamePlayerData = GameRpcManager.I.GetGamePlayerData(thisObjectId);
+            GameSceneManager.I.SynchronousScene();
+            GameView gameView = FindAnyObjectByType<GameView>();
+            gameView.ShowGameStart();
+        }
     }
 
     private void Update()
     {
         if (!IsOwner) return;
-        if (_isDie) return;
-        if (_isStopAction) return;
+        if (_gamePlayerData.IsDie) return;
+        if (_gamePlayerData.IsStopAction) return;
         if (_isLocalDixconnect) return;
 
         _movement = Vector3.zero;
@@ -92,7 +87,7 @@ public class CharacterControl : BaseNetworkObject
 
     private void FixedUpdate()
     {
-        if (_isDie) return;
+        if (_gamePlayerData.IsDie) return;
         if (_isLocalDixconnect) return;
 
         if (_movement != Vector3.zero)
@@ -107,7 +102,7 @@ public class CharacterControl : BaseNetworkObject
                 _turnSpeed * Time.fixedDeltaTime
             );
 
-            _rigidbody.linearVelocity = _movement.normalized * _moveSpeed;
+            _rigidbody.linearVelocity = _movement.normalized * _gamePlayerData.MoveSpeed;
         }
         else
         {
@@ -120,7 +115,7 @@ public class CharacterControl : BaseNetworkObject
     private void OnCollisionStay(Collision collision)
     {
         if (!IsOwner) return;
-        if (_isDie) return;
+        if (_gamePlayerData.IsDie) return;
         if (_isLocalDixconnect) return;
 
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Ground}"))
@@ -137,20 +132,32 @@ public class CharacterControl : BaseNetworkObject
     }
 
     /// <summary>
+    /// 設置攝影機跟隨
+    /// </summary>
+    private void SetCameraFollow()
+    {
+        if (IsOwner)
+        {
+            cameraFollow = Camera.main.GetComponent<CameraFollow>();
+            cameraFollow.Target = transform;
+        }
+    }
+
+    /// <summary>
     /// 生成炸彈
     /// </summary>
     /// <param name="target"></param>
     private void SpawnBomb()
     {
         if (_nearestGrounds == null) return;
-        if (_bombCount <= 0) return;
+        if (_gamePlayerData.BombCount <= 0) return;
 
         Vector3 offset = GameDataManager.I.CreateSceneObjectOffset;
         Vector3 spawnPosition = _nearestGrounds.transform.position + offset + Vector3.up * _nearestGrounds.transform.lossyScale.y / 2;
 
         GameRpcManager.I.SpawnBombServerRpc(
             thisObjectId,
-            _explotionLevel,
+            _gamePlayerData.ExplotionLevel,
             spawnPosition);
     }
 
@@ -159,24 +166,14 @@ public class CharacterControl : BaseNetworkObject
     /// </summary>
     public void UpdateCharacterData()
     {
+        _gamePlayerData = GameRpcManager.I.GetGamePlayerData(thisObjectId);
+
         // 首次更新資料
         if (_isFirstUpdateData == false)
         {
-            GamePlayerData data = GameRpcManager.I.GetGamePlayerData(thisObjectId);
-            SetNicknameText($"{data.Nickname}");
+            SetNicknameText($"{_gamePlayerData.Nickname}");
             _isFirstUpdateData = true;
         }
-
-
-        if (!IsOwner) return;
-        if (_isDie) return;
-
-        GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(thisObjectId);
-        _bombCount = gamePlayerData.BombCount;
-        _explotionLevel = gamePlayerData.ExplotionLevel;
-        _moveSpeed = gamePlayerData.MoveSpeed;
-        _isDie = gamePlayerData.IsDie;
-        _isStopAction = gamePlayerData.IsStopAction;
     }
 
     /// <summary>
@@ -195,7 +192,6 @@ public class CharacterControl : BaseNetworkObject
     /// </summary>
     public void OnDie()
     {
-        _isDie = true;
         StartCoroutine(IDieBehavior());
     }
 

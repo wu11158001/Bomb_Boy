@@ -5,9 +5,15 @@ using System;
 public class CameraFollow : MonoBehaviour
 {
     public Transform Target;
+    Vector3 TopPosition = new(-10, 24, 11.5f);
     [SerializeField] Vector3 _offset;
     [SerializeField] float _cameraHeight;
     [SerializeField] float _cameraAngleX;
+
+    private void Start()
+    {
+        transform.position = TopPosition;
+    }
 
     private void LateUpdate()
     {
@@ -33,7 +39,7 @@ public class CameraFollow : MonoBehaviour
     /// <returns></returns>
     private IEnumerator IMoveToDieViewing()
     {
-        Vector3 targetPosition = new Vector3(-10, 24, 11.5f);
+        Vector3 targetPosition = TopPosition;
         Quaternion targetRotation = Quaternion.Euler(90, 0, 0);
         float during = 1.0f;
 

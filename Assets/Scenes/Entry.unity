@@ -789,6 +789,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 132536, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
   m_PrefabInstance: {fileID: 1592256223}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2133679779 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2032253506951834136, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+  m_PrefabInstance: {fileID: 70944398524022939}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &70944398524022939
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -801,10 +812,42 @@ PrefabInstance:
       propertyPath: m_Name
       value: EntryView
       objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 231
+      objectReference: {fileID: 0}
     - target: {fileID: 6462260747072909235, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
       propertyPath: DebugTool
       value: 
       objectReference: {fileID: 1592256224}
+    - target: {fileID: 6462260747072909235, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: JoinLobby_Btn
+      value: 
+      objectReference: {fileID: 2133679779}
     - target: {fileID: 6798843988851972894, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -884,6 +927,10 @@ PrefabInstance:
     - target: {fileID: 6798843988851972894, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6813141520875936398, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_Name
+      value: JoinLobby_Btn
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

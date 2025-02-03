@@ -86,8 +86,8 @@ public class ExplosionControl : BaseNetworkObject
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.BreakObstacle}"))
             {
                 /*接觸可擊破物*/
-
-                GameSceneManager.I.DespawnBreakObstacle(collider.gameObject);
+                NetworkObject networkObject = collider.gameObject.GetComponent<NetworkObject>();
+                GameSceneManager.I.DespawnBreakObstacle(networkObject.NetworkObjectId);
                 LastCount = 0;
             }
 

@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - Locale-zh-TW
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: afd84f5dc430b0746a8ab6a8c934dae4
+    m_Address: Ask_Table_zh-TW
+    m_ReadOnly: 1
+    m_SerializedLabels:
+    - Locale-zh-TW
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bd401237b988f7244a8fe8ddf4b0b23a
     m_Address: Game_Table_zh-TW
     m_ReadOnly: 1

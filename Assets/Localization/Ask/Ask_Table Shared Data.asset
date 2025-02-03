@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: Ask_Table Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: Ask_Table
+  m_TableCollectionNameGuidString: 530650297692a8d45a392d40294db34e
+  m_Entries:
+  - m_Id: 828081115136
+    m_Key: Confirm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 874184904704
+    m_Key: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 4697296896
+    m_Key: There is an unfinished game, would you like to enter it?
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 2819143462881591460
+  references:
+    version: 2
+    RefIds:
+    - rid: 2819143462881591460
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1738475330150

@@ -20,7 +20,7 @@ public class EntryView : MonoBehaviour
     [SerializeField] GameObject Loading_Obj;
     [SerializeField] TMP_InputField Nickname_If;
     [SerializeField] TextMeshProUGUI NicknameErrorTip_Txt;
-    [SerializeField] Button JoinLobby;
+    [SerializeField] Button JoinLobby_Btn;
 
     [Space(30)]
     [Header("語言")]
@@ -29,6 +29,11 @@ public class EntryView : MonoBehaviour
 
     private Coroutine _nicknameError_coroutine;
     private Vector2 _initNicknameErrorTxtPos;
+
+    private void OnDestroy()
+    {
+        AuthenticationService.Instance.SignedIn -= OnSignedIn;
+    }
 
     public void Awake()
     {
@@ -47,15 +52,11 @@ public class EntryView : MonoBehaviour
             yield return null;
         }
 
-        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
-
         LanguageManager.I.InitializeLanguageManager();
         yield return UnityServices.InitializeAsync();
 
-        AuthenticationService.Instance.SignedIn += () =>
-        {
-            Debug.Log($"登入ID:{AuthenticationService.Instance.PlayerId}");
-        };
+        // 登入完成事件
+        AuthenticationService.Instance.SignedIn += OnSignedIn;
         yield return AuthenticationService.Instance.SignInAnonymouslyAsync();
 
         Loading_Obj.SetActive(false);
@@ -78,19 +79,11 @@ public class EntryView : MonoBehaviour
         }
 
         string recodeNickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY);
+
         Nickname_If.Select();
         Nickname_If.text = recodeNickname;
 
         EventListener();
-    }
-
-    private void Update()
-    {
-        // 發送進入遊戲
-        if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            JudgeEnterGameData();
-        }
     }
 
     /// <summary>
@@ -123,10 +116,50 @@ public class EntryView : MonoBehaviour
         });
 
         // 加入大廳按鈕
-        JoinLobby.onClick.AddListener(() =>
+        JoinLobby_Btn.onClick.AddListener(() =>
         {
             JudgeEnterGameData();
         });
+    }
+
+    /// <summary>
+    /// 登入完成事件
+    /// </summary>
+    private void OnSignedIn()
+    {
+        Debug.Log($"登入ID:{AuthenticationService.Instance.PlayerId}");
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        ReconnectHandle();
+    }
+
+    /// <summary>
+    /// 重新連線處理
+    /// </summary>
+    private async void ReconnectHandle()
+    {
+        string lobbyJoinId = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_JOIN_LOBBY_ID);
+        PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_JOIN_LOBBY_ID, "");
+
+        // 嘗試斷線重連
+        if (!string.IsNullOrEmpty(lobbyJoinId))
+        {
+            Lobby lobby = await LobbyManager.I.ReconnectQueryLobby(lobbyJoinId);
+
+            if (lobby != null)
+            {
+                LanguageManager.I.GetString(LocalizationTableEnum.Ask_Table, "There is an unfinished game, would you like to enter it?", (text) =>
+                {
+                    ViewManager.I.OpenView<AskView>(ViewEnum.AskView, (view) =>
+                    {
+                        view.SetAskView(text, async () =>
+                        {
+                            ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+                            await LobbyManager.I.JoinLobby(lobby);
+                        });
+                    });
+                });
+            }           
+        }
     }
 
     /// <summary>
@@ -137,6 +170,11 @@ public class EntryView : MonoBehaviour
         if (_nicknameError_coroutine != null) StopCoroutine(_nicknameError_coroutine);
         _nicknameError_coroutine = StartCoroutine(INicknameErrorEffect());
     }
+
+    /// <summary>
+    /// 暱稱錯誤效果
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator INicknameErrorEffect()
     {
         // 抖動震幅

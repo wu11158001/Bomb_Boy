@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ea05b2a0e20fc148906699fb5677700, type: 3}
   m_Name: View_SO
   m_EditorClassIdentifier: 
-  ViewList: []
+  ViewList:
+  - {fileID: 1160043110121114075, guid: 275be069cee09304b86651eeb99323a4, type: 3}
   PermanentViewList:
   - {fileID: 8623208578387131280, guid: 14451dd3eb3b8794f86bb3db6e2d67ba, type: 3}
   - {fileID: 7406489754698194826, guid: 5db11548212b5fa408c0a667debd0ccd, type: 3}
