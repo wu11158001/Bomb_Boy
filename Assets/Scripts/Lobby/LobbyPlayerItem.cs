@@ -13,6 +13,7 @@ public class LobbyPlayerItem : MonoBehaviour
     [SerializeField] GameObject Host_Obj;
     [SerializeField] TextMeshProUGUI Nickname_Txt;
     [SerializeField] TextMeshProUGUI Prepare_Txt;
+    [SerializeField] GameObject SpeechDetected_Obj;
 
     // Lobby玩家編號
     private int _playerIndex;

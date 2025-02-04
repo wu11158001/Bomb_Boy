@@ -19,6 +19,10 @@ public class LobbyView : MonoBehaviour
     [SerializeField] RectTransform LobbyPlayerArea;
     [SerializeField] GameObject LobbyPlayerItemSample;
 
+    [Space(30)]
+    [Header("聊天區域")]
+    [SerializeField] LobbyChatArea _lobbyChatArea;
+
     // 大廳玩家項目
     private LobbyPlayerItem[] _lobbyPlayerItem_Array = new LobbyPlayerItem[4];
 
@@ -46,24 +50,6 @@ public class LobbyView : MonoBehaviour
 
         EventListener();
         UpdateListPlayerItem();
-    }
-
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            Debug.Log($"{NetworkManager.Singleton.IsServer}");
-        }
-
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            Debug.LogError(LobbyManager.I.IsLobbyHost());
-        }
-
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            Debug.LogError(LobbyManager.I.JoinedLobby.HostId);
-        }
     }
 
     /// <summary>
@@ -195,5 +181,14 @@ public class LobbyView : MonoBehaviour
     public void ReadyInGame()
     {
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+    }
+
+    /// <summary>
+    /// 聊天訊息接收
+    /// </summary>
+    /// <param name="ChatData"></param>
+    public void ChatMessageReceived(ChatData chatData)
+    {
+        _lobbyChatArea.ShowChatMessage(chatData);
     }
 }

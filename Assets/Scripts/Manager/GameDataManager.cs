@@ -11,3 +11,16 @@ public class GameDataManager : UnitySingleton<GameDataManager>
     // 下個地板位置距離
     public const float NextGroundDistance = 1.6f;
 }
+
+/// <summary>
+/// 聊天資料
+/// </summary>
+public class ChatData
+{
+    // 登入Id
+    public string AuthenticationPlayerId;
+    // 暱稱
+    public string Nickname;
+    // 聊天訊息
+    public string ChatMsg;
+}

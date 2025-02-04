@@ -101,6 +101,8 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             JoinedLobby = await LobbyService.Instance.CreateLobbyAsync(id, GameDataManager.MaxPlayer, createLobbyOptions);
             CurrLobbyHostId = JoinedLobby.HostId;
 
+            await JoinVivox();
+
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"創建大廳, LobbyId: {JoinedLobby.Id}");
         }
@@ -130,6 +132,8 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             // 加入Lobby
             JoinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(joinLobby.Id);
             CurrLobbyHostId = JoinedLobby.HostId;
+
+            await JoinVivox();
 
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"加入大廳, LobbyId: {JoinedLobby.Id}");
@@ -165,6 +169,8 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             await RelayManager.I.JoinRelay(relayJoinCode);
             CurrRelayJoinCode = relayJoinCode;
 
+            await JoinVivox();
+
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"快速加入大廳, LobbyId: {JoinedLobby.Id}");
         }
@@ -190,8 +196,10 @@ public class LobbyManager : UnitySingleton<LobbyManager>
                 NetworkManager.Singleton.Shutdown(false);
                 await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
+                await VivoxManager.I.LeaveEchoChannelAsync();
+
                 JoinedLobby = null;
-                
+
                 Debug.Log("離開大廳");
             }
         }
@@ -331,5 +339,15 @@ public class LobbyManager : UnitySingleton<LobbyManager>
         {
             Debug.LogError($"刷新房間錯誤:{e}");
         }
+    }
+
+    /// <summary>
+    /// 加入Vivox
+    /// </summary>
+    /// <returns></returns>
+    private async Task JoinVivox()
+    {
+        await VivoxManager.I.LoginToVivoxAsync();
+        await VivoxManager.I.JoinGroupChannelAsync(JoinedLobby.Id);
     }
 }

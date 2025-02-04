@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Netcode;
+using Unity.Services.Vivox;
 
 public class EntryView : MonoBehaviour
 {
@@ -32,7 +33,7 @@ public class EntryView : MonoBehaviour
 
     private void OnDestroy()
     {
-        AuthenticationService.Instance.SignedIn -= OnSignedIn;
+        AuthenticationService.Instance.SignedIn -= OnSignedIn;        
     }
 
     public void Awake()
@@ -58,6 +59,10 @@ public class EntryView : MonoBehaviour
         // 登入完成事件
         AuthenticationService.Instance.SignedIn += OnSignedIn;
         yield return AuthenticationService.Instance.SignInAnonymouslyAsync();
+        yield return VivoxService.Instance.InitializeAsync();
+
+        // 綁定Vivox事件
+        VivoxManager.I.BindVivoxEvents();
 
         Loading_Obj.SetActive(false);
         switch (LanguageManager.I.CurrLanguage)
@@ -80,7 +85,7 @@ public class EntryView : MonoBehaviour
 
         string recodeNickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY);
 
-        Nickname_If.Select();
+        Nickname_If.ActivateInputField();
         Nickname_If.text = recodeNickname;
 
         EventListener();
