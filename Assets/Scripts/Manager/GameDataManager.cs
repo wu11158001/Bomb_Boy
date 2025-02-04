@@ -10,6 +10,8 @@ public class GameDataManager : UnitySingleton<GameDataManager>
     public readonly Vector3 PhysicsSize = new(0.5f, 1.5f, 0.5f);
     // 下個地板位置距離
     public const float NextGroundDistance = 1.6f;
+    // 遊戲時間
+    public const int GameTime = 10;
 }
 
 /// <summary>

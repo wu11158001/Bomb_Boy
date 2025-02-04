@@ -51,6 +51,7 @@ public class LobbyPlayerItem : MonoBehaviour
     /// <param name="lobbyPlayerData"></param>
     public void UpdateLobbyPlayerItem(LobbyPlayerData lobbyPlayerData)
     {
+        _vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == lobbyPlayerData.AuthenticationPlayerId).FirstOrDefault();
         bool isLobbyHost = LobbyManager.I.JoinedLobby.HostId == lobbyPlayerData.AuthenticationPlayerId;
         bool isLocalHost = LobbyManager.I.IsLobbyHost();
         bool isLocal = lobbyPlayerData.NetworkClientId == NetworkManager.Singleton.LocalClientId;
@@ -66,11 +67,24 @@ public class LobbyPlayerItem : MonoBehaviour
 
         // 靜音按鈕
         Mute_Tog.gameObject.SetActive(!isLocal);
-        Mute_Tog.isOn = true;
-        Mute_Tog.onValueChanged.RemoveAllListeners();
-        Mute_Tog.onValueChanged.AddListener((isOn) =>
+        if (_vivoxParticipant != null)
         {
-        });
+            Mute_Tog.isOn = _vivoxParticipant.IsMuted;
+            Mute_Tog.onValueChanged.RemoveAllListeners();
+            Mute_Tog.onValueChanged.AddListener((isOn) =>
+            {
+                if (isOn)
+                {
+                    /*靜音*/
+                    _vivoxParticipant.MutePlayerLocally();
+                }
+                else
+                {
+                    /*解除靜音*/
+                    _vivoxParticipant.UnmutePlayerLocally();
+                }
+            });
+        }
 
         // 交換房主按鈕
         MigrateHost_Btn.gameObject.SetActive(isLocalHost && !isLocal);
@@ -98,7 +112,5 @@ public class LobbyPlayerItem : MonoBehaviour
                 Prepare_Txt.text = "";
             }            
         });
-
-        _vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == lobbyPlayerData.AuthenticationPlayerId).FirstOrDefault();
     }
 }

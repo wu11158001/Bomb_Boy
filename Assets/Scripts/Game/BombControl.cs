@@ -24,7 +24,7 @@ public class BombControl : BaseNetworkObject
     public int ExplotionLevel { get; set; }
 
     // 產生角色Id
-    public NetworkVariable<ulong> CharacterObjectId
+    public NetworkVariable<ulong> CharacterObjectId_NV
         = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private void OnDrawGizmos()
@@ -92,7 +92,7 @@ public class BombControl : BaseNetworkObject
                     true);
 
                 // 更新遊戲玩家資料
-                GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(CharacterObjectId.Value);
+                GamePlayerData gamePlayerData = GameRpcManager.I.GetGamePlayerData(CharacterObjectId_NV.Value);
                 gamePlayerData.BombCount += 1;
                 GameRpcManager.I.UpdateLobbyPlayerServerRpc(gamePlayerData);
 

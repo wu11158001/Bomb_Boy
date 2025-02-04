@@ -9,11 +9,13 @@ using Unity.Services.Authentication;
 public class GameView : MonoBehaviour
 {
     [SerializeField] Button ExitGame_Btn;
+    [SerializeField] TextMeshProUGUI GameCd_Txt;
     [SerializeField] TextMeshProUGUI GameResult_Txt;
     [SerializeField] TextMeshProUGUI Winner_Txt;
     [SerializeField] TextMeshProUGUI GameStartCD_Txt;
     [SerializeField] TextMeshProUGUI ReturnLobbyCD_Txt;
     [SerializeField] GameObject InputController_Obj;
+    [SerializeField] GamePlayerItemArea _gamePlayerItemArea;
 
     private void Awake()
     {
@@ -159,6 +161,17 @@ public class GameView : MonoBehaviour
         });
 
         StartCoroutine(ICloseGameStartTet());
+        _gamePlayerItemArea.ItemSwitchEffect(false);
+    }
+
+    /// <summary>
+    /// 顯示倒數
+    /// </summary>
+    public void DisplayGameTime()
+    {
+        int minute = GameRpcManager.I.GameTimeCd_NV.Value / 60;
+        int second = GameRpcManager.I.GameTimeCd_NV.Value % 60;
+        GameCd_Txt.text = $"{minute:D2} : {second:D2}";
     }
 
     /// <summary>

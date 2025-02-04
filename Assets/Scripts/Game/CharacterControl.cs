@@ -27,7 +27,7 @@ public class CharacterControl : BaseNetworkObject
     // 是否已首次更新資料
     private bool _isFirstUpdateData;
     // 是否該角色玩家已斷線
-    private bool _isLocalDixconnect;
+    private bool _isLocalDisconnect;
 
     private GamePlayerData _gamePlayerData;
 
@@ -56,7 +56,7 @@ public class CharacterControl : BaseNetworkObject
     protected override void OnOwnershipChanged(ulong previous, ulong current)
     {
         Debug.Log($"角色 {thisObjectId} 擁有權更改: {previous} => {current}");
-        _isLocalDixconnect = IsServer;
+        _isLocalDisconnect = IsServer;
         if (!IsServer && IsOwner)
         {            
             SetCameraFollow();
@@ -70,26 +70,23 @@ public class CharacterControl : BaseNetworkObject
     private void Update()
     {
         if (!IsOwner) return;
-        if (_gamePlayerData.IsDie) return;
-        if (_gamePlayerData.IsStopAction) return;
-        if (_isLocalDixconnect) return;
 
         _movement = Vector3.zero;
+        _animator.SetBool(_isMove_Hash, _movement.x != 0 || _movement.z != 0);
+
+        if (_gamePlayerData.IsDie) return;
+        if (_gamePlayerData.IsStopAction) return;
+        if (_isLocalDisconnect) return;
 
         if (Input.GetKey(KeyCode.UpArrow)) _movement.z = 1;
         if (Input.GetKey(KeyCode.DownArrow)) _movement.z = -1;
         if (Input.GetKey(KeyCode.LeftArrow)) _movement.x = -1;
         if (Input.GetKey(KeyCode.RightArrow)) _movement.x = 1;
         if (Input.GetKeyDown(KeyCode.Space)) SpawnBomb();
-
-        _animator.SetBool(_isMove_Hash, _movement.x != 0 || _movement.z != 0);
     }
 
     private void FixedUpdate()
     {
-        if (_gamePlayerData.IsDie) return;
-        if (_isLocalDixconnect) return;
-
         if (_movement != Vector3.zero)
         {
             /*角色移動*/
@@ -102,13 +99,19 @@ public class CharacterControl : BaseNetworkObject
                 _turnSpeed * Time.fixedDeltaTime
             );
 
-            _rigidbody.linearVelocity = _movement.normalized * _gamePlayerData.MoveSpeed;
+            if (!_gamePlayerData.IsDie && !_isLocalDisconnect)
+            {
+                _rigidbody.linearVelocity = _movement.normalized * _gamePlayerData.MoveSpeed;
+            }
         }
         else
         {
             /*停止移動*/
 
-            _rigidbody.linearVelocity = Vector3.zero;
+            if (!_gamePlayerData.IsDie && !_isLocalDisconnect)
+            {
+                _rigidbody.linearVelocity = Vector3.zero;
+            } 
         }
     }
 
@@ -116,7 +119,7 @@ public class CharacterControl : BaseNetworkObject
     {
         if (!IsOwner) return;
         if (_gamePlayerData.IsDie) return;
-        if (_isLocalDixconnect) return;
+        if (_isLocalDisconnect) return;
 
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Ground}"))
         {
@@ -214,7 +217,7 @@ public class CharacterControl : BaseNetworkObject
         {
             GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
 
-            if (!_isLocalDixconnect)
+            if (!_isLocalDisconnect)
             {
                 cameraFollow.OnLoccalDie();
             }            

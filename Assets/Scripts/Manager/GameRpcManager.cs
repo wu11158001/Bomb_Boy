@@ -27,7 +27,12 @@ public class GameRpcManager : NetworkBehaviour
     public NetworkVariable<int> SpeedPropsRemainingQuantity { get; private set; }
     = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
+    // 遊戲倒數時間
+    public NetworkVariable<int> GameTimeCd_NV = new(
+        0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
     private GameView _gameView;
+    private bool _isGameOver;
 
     // 角色生成位置
     private List<Vector3> shuffleSpawnPos;
@@ -54,11 +59,13 @@ public class GameRpcManager : NetworkBehaviour
     {
         Debug.Log("退出 Game Rpc");
         GamePlayerData_List.OnListChanged -= OnGamePlayerChange;
+        GameTimeCd_NV.OnValueChanged -= OnGameTimeChange;
     }
 
     public override void OnNetworkSpawn()
     {
         GamePlayerData_List.OnListChanged += OnGamePlayerChange;
+        GameTimeCd_NV.OnValueChanged += OnGameTimeChange;
     }
 
     /// <summary>
@@ -78,6 +85,20 @@ public class GameRpcManager : NetworkBehaviour
                     characterControl.UpdateCharacterData();
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// 遊戲時間變更
+    /// </summary>
+    /// <param name="previousValue"></param>
+    /// <param name="newValue"></param>
+    private void OnGameTimeChange(int previousValue, int newValue)
+    {
+        CheckGameView();
+        if (_gameView != null && _gameView.gameObject.activeSelf)
+        {
+            _gameView.DisplayGameTime();
         }
     }
 
@@ -154,6 +175,11 @@ public class GameRpcManager : NetworkBehaviour
         if (GamePlayerData_List.Count == LobbyRpcManager.I.LobbyPlayerData_List.Count)
         {
             Debug.Log("所有玩家進入遊戲場景");
+            _isGameOver = false;
+
+            // 初始化遊戲時間
+            GameTimeCd_NV.Value = GameDataManager.GameTime;
+
             ShowGameSceneClientRpc();
             StartCoroutine(IStartGameCD());
         }
@@ -226,7 +252,7 @@ public class GameRpcManager : NetworkBehaviour
         networkObject.Spawn(true);
 
         BombControl bombControl = obj.GetComponent<BombControl>();
-        bombControl.CharacterObjectId.Value = networkObjectId;
+        bombControl.CharacterObjectId_NV.Value = networkObjectId;
         bombControl.ExplotionLevel = explotionLevel;
 
         // 更新遊戲玩家資料
@@ -388,6 +414,8 @@ public class GameRpcManager : NetworkBehaviour
     [ServerRpc(RequireOwnership =false)]
     public void JudgeGameResultServerRpc()
     {
+        if (_isGameOver) return;
+
         int survival = 0;
         GamePlayerData winnerData = new();
 
@@ -400,17 +428,33 @@ public class GameRpcManager : NetworkBehaviour
             }
         }
 
+        // 遊戲結束
         if (survival <= 1)
         {
-            // 停止玩家角色動作
-            for (int i = 0; i < GamePlayerData_List.Count; i++)
-            {
-                GamePlayerData gamePlayerData = GetGamePlayerData(GamePlayerData_List[i].CharacterId);
-                gamePlayerData.IsStopAction = true;
-                UpdateLobbyPlayerServerRpc(gamePlayerData);
-            }
+            _isGameOver = true;
 
+            OnGameOver();
             OnGameResultClientRpc(survival == 0, winnerData);
+            StartCoroutine(IReturnToLobbyCD());
+        }
+    }
+
+    /// <summary>
+    /// 遊戲時間倒數
+    /// </summary>
+    [ServerRpc]
+    public void GameTimeCdServerRpc()
+    {
+        GameTimeCd_NV.Value -= 1;
+
+        if (GameTimeCd_NV.Value <= 0)
+        {
+            /*時間結束平手*/
+
+            _isGameOver = true;
+
+            OnGameOver();
+            OnGameResultClientRpc(true, new GamePlayerData());
             StartCoroutine(IReturnToLobbyCD());
         }
     }
@@ -522,6 +566,7 @@ public class GameRpcManager : NetworkBehaviour
             UpdateLobbyPlayerServerRpc(gamePlayerData);
         }
 
+        InvokeRepeating(nameof(GameTimeCdServerRpc), 0, 1);
         GameStartClientRpc();
     }
 
@@ -558,5 +603,22 @@ public class GameRpcManager : NetworkBehaviour
                 _gameView = gameViewObj.GetComponent<GameView>();
             }
         }
+    }
+
+    /// <summary>
+    /// 遊戲結束
+    /// </summary>
+    private void OnGameOver()
+    {
+        // 停止玩家角色動作
+        for (int i = 0; i < GamePlayerData_List.Count; i++)
+        {
+            GamePlayerData gamePlayerData = GetGamePlayerData(GamePlayerData_List[i].CharacterId);
+            gamePlayerData.IsStopAction = true;
+            UpdateLobbyPlayerServerRpc(gamePlayerData);
+        }
+
+        // 停止遊戲時間倒數
+        CancelInvoke(nameof(GameTimeCdServerRpc));
     }
 }
