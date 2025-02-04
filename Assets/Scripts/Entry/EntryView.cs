@@ -88,6 +88,7 @@ public class EntryView : MonoBehaviour
         Nickname_If.ActivateInputField();
         Nickname_If.text = recodeNickname;
 
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         EventListener();
     }
 
@@ -132,8 +133,7 @@ public class EntryView : MonoBehaviour
     /// </summary>
     private void OnSignedIn()
     {
-        Debug.Log($"登入ID:{AuthenticationService.Instance.PlayerId}");
-        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        Debug.Log($"登入ID:{AuthenticationService.Instance.PlayerId}");        
         ReconnectHandle();
     }
 
@@ -237,6 +237,7 @@ public class EntryView : MonoBehaviour
     {
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY, Nickname_If.text);
+
 
         await LobbyManager.I.QuickJoinLobby();
 

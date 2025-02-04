@@ -8,28 +8,23 @@ public class LobbyChatArea : MonoBehaviour
 {
     [SerializeField] Toggle SelfMute_Tog;
     [SerializeField] TMP_InputField Chat_If;
+    [SerializeField] RectTransform Chat_Sr;
     [SerializeField] RectTransform ChatNode;
+    [SerializeField] VerticalLayoutGroup ChatNode_VLayout;
     [SerializeField] LobbyChatItem LobbyChatItemSample;
-
-    // 本地玩家VivoxParticipant
-    private VivoxParticipant _localVivoxParticipant;
+    [SerializeField] Button NewMsg_Btn;
 
     private void Start()
     {
         LobbyChatItemSample.gameObject.SetActive(false);
+        ChatNode.sizeDelta = new Vector2(ChatNode.sizeDelta.x, 0);
+        NewMsg_Btn.gameObject.SetActive(false);
 
         // 初始本地靜音
-        VivoxManager.I.LocalMute(true);
-        // 獲取本地玩家VivoxParticipant
-        foreach (var participant in VivoxManager.I.VivoxParticipantList)
-        {
-            if (participant.IsSelf)
-            {
-                _localVivoxParticipant = participant;
-                break;
-            }
-        }
-        SelfMute_Tog.isOn = !_localVivoxParticipant.IsMuted;
+        VivoxManager.I.LocalMute(false);
+        SelfMute_Tog.isOn = false;
+
+        EventListener();
     }
 
     private void Update()
@@ -48,6 +43,12 @@ public class LobbyChatArea : MonoBehaviour
                 Chat_If.ActivateInputField();
             }
         }
+
+        // 滑條移動至最下方
+        if (ChatNode.anchoredPosition.y >= ChatNode.sizeDelta.y - Chat_Sr.sizeDelta.y - 70)
+        {
+            NewMsg_Btn.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>
@@ -60,6 +61,12 @@ public class LobbyChatArea : MonoBehaviour
         {
             VivoxManager.I.LocalMute(isOn);
         });
+
+        // 移動至新訊息按鈕
+        NewMsg_Btn.onClick.AddListener(() =>
+        {
+            MoveToNewMsg();
+        });
     }
 
     /// <summary>
@@ -69,9 +76,50 @@ public class LobbyChatArea : MonoBehaviour
     public void ShowChatMessage(ChatData chatData)
     {
         bool isLocal = chatData.AuthenticationPlayerId == AuthenticationService.Instance.PlayerId;
+        float originalSize = Chat_Sr.sizeDelta.y;
 
         LobbyChatItem lobbyChatItem = Instantiate(LobbyChatItemSample, ChatNode).GetComponent<LobbyChatItem>();
         lobbyChatItem.gameObject.SetActive(true);
-        lobbyChatItem.SetLobbyChatItem(chatData, isLocal);
+        Vector2 itemSizeDelta = lobbyChatItem.SetLobbyChatItem(chatData, isLocal);
+
+        // 設置顯示區域大小
+        ChatNode.sizeDelta = new Vector2(
+            ChatNode.sizeDelta.x,
+            ChatNode.sizeDelta.y + itemSizeDelta.y + ChatNode_VLayout.spacing);
+
+        // 判斷是否移動至新訊息
+        if (isLocal)
+        {
+            MoveToNewMsg();
+        }
+        else
+        {
+            if (ChatNode.childCount < 2) return;
+
+            RectTransform lastItem = ChatNode.GetChild(ChatNode.childCount - 2).GetComponent<RectTransform>();
+            float movePos = ChatNode.sizeDelta.y - originalSize - lastItem.sizeDelta.y - 60;
+            if (ChatNode.anchoredPosition.y >= movePos)
+            {
+                MoveToNewMsg();
+            }
+            else
+            {
+                if (ChatNode.sizeDelta.y > Chat_Sr.sizeDelta.y)
+                {
+                    NewMsg_Btn.gameObject.SetActive(true);
+                }                
+            }
+        }
+    }
+
+    /// <summary>
+    /// 移動至新訊息
+    /// </summary>
+    private void MoveToNewMsg()
+    {
+        float posY = Mathf.Max(0, ChatNode.sizeDelta.y - Chat_Sr.sizeDelta.y);
+        ChatNode.anchoredPosition = new Vector2(0, posY);
+
+        NewMsg_Btn.gameObject.SetActive(false);
     }
 }

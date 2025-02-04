@@ -182,10 +182,10 @@ public class Utils : UnitySingleton<Utils>
     /// <param name="rt"></param>
     /// <param name="isHorizontal"></param>
     /// <param name="rowOrColumnCount">平均內容數量</param>
-    public void SetGridLayoutSize(RectTransform rt, bool isHorizontal, int rowOrColumnCount = 1)
+    public void SetGridLayoutSize(RectTransform rt, bool isHorizontal, int rowOrColumnCount)
     {
         GridLayoutGroup gridLayout = rt.GetComponent<GridLayoutGroup>();
-        float _gridLayoutSpace = isHorizontal ?
+        float _layoutSpace = isHorizontal ?
                                  gridLayout.cellSize.x + gridLayout.spacing.x :
                                  gridLayout.cellSize.y + gridLayout.spacing.y;
         Vector2 offset = isHorizontal ?
@@ -203,11 +203,11 @@ public class Utils : UnitySingleton<Utils>
 
         if (isHorizontal)
         {
-            offset.x = (Mathf.CeilToInt(count / rowOrColumnCount)) * _gridLayoutSpace;
+            offset.x = (Mathf.CeilToInt(count / rowOrColumnCount)) * _layoutSpace;
         }
         else
         {
-            offset.y = (Mathf.CeilToInt(count / rowOrColumnCount)) * _gridLayoutSpace;
+            offset.y = (Mathf.CeilToInt(count / rowOrColumnCount)) * _layoutSpace;
         }
 
         rt.sizeDelta = offset;

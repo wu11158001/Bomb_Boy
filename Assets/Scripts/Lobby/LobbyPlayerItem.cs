@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.Netcode;
-using Unity.Services.Lobbies;
-using Unity.Services.Lobbies.Models;
+using Unity.Services.Vivox;
+using System.Linq;
 
 public class LobbyPlayerItem : MonoBehaviour
 {
@@ -15,26 +15,34 @@ public class LobbyPlayerItem : MonoBehaviour
     [SerializeField] TextMeshProUGUI Prepare_Txt;
     [SerializeField] GameObject SpeechDetected_Obj;
 
-    // Lobby玩家編號
-    private int _playerIndex;
+    private VivoxParticipant _vivoxParticipant;
+
+    private void Update()
+    {
+        if (_vivoxParticipant != null)
+        {
+            SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
+        }
+    }
 
     /// <summary>
     /// 初始化大廳玩家項目
     /// </summary>
     public void InitializeLobbyPlayerItem(int playerIndex)
     {
-        _playerIndex = playerIndex;
-
         Kick_Btn.gameObject.SetActive(false);
         Mute_Tog.gameObject.SetActive(false);
         MigrateHost_Btn.gameObject.SetActive(false);
         Host_Obj.SetActive(false);
+        SpeechDetected_Obj.SetActive(false);
 
         Nickname_Txt.text = "";
         LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Waiting to join", (text) =>
         {
             Prepare_Txt.text = text;
         });
+
+        _vivoxParticipant = null;
     }
 
     /// <summary>
@@ -90,6 +98,7 @@ public class LobbyPlayerItem : MonoBehaviour
                 Prepare_Txt.text = "";
             }            
         });
-        
+
+        _vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == lobbyPlayerData.AuthenticationPlayerId).FirstOrDefault();
     }
 }

@@ -17,7 +17,7 @@ public class LobbyChatItem : MonoBehaviour
     /// </summary>
     /// <param name="chatData"></param>
     /// <param name="isLocal">本地玩家/其他玩家</param>
-    public void SetLobbyChatItem(ChatData chatData, bool isLocal)
+    public Vector2 SetLobbyChatItem(ChatData chatData, bool isLocal)
     {
         if (isLocal)
         {
@@ -79,8 +79,11 @@ public class LobbyChatItem : MonoBehaviour
             preferredHeight + Mathf.Abs(spaceHeight));
 
         // 項目元件大小
-        ThisRt.sizeDelta = new Vector2(
+        Vector2 thisSizeDalta = new(
             ThisRt.sizeDelta.x,
             Nickname_Txt.rectTransform.sizeDelta.y + ChatBg_Rt.sizeDelta.y);
+        ThisRt.sizeDelta = thisSizeDalta;
+
+        return thisSizeDalta;
     }
 }

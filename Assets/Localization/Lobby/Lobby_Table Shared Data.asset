@@ -47,6 +47,10 @@ MonoBehaviour:
     m_Key: Enter text
     m_Metadata:
       m_Items: []
+  - m_Id: 4727142977572864
+    m_Key: New Message
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

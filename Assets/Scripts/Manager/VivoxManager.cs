@@ -15,7 +15,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
 
     private void OnDestroy()
     {
-        VivoxManager.I.UnBindVivoxEvent();
+        UnBindVivoxEvent();
     }
 
     /// <summary>
