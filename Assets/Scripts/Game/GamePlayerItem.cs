@@ -42,8 +42,12 @@ public class GamePlayerItem : MonoBehaviour
                 Mute_Tog.isOn = _vivoxParticipant.IsMuted;
             }
 
-            Nickname_Txt.text = _vivoxParticipant.DisplayName;
-            SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
+            if (_vivoxParticipant != null &&
+                !string.IsNullOrEmpty(_vivoxParticipant.DisplayName))
+            {
+                Nickname_Txt.text = _vivoxParticipant.DisplayName;
+                SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
+            }
         }
         else
         {

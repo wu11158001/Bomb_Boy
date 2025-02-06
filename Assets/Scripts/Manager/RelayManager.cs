@@ -54,7 +54,7 @@ public class RelayManager : UnitySingleton<RelayManager>
     /// 加入Relay
     /// </summary>
     /// <param name="joinCode"></param>
-    public async Task JoinRelay(string joinCode)
+    public async Task<bool> JoinRelay(string joinCode)
     {
         try
         {
@@ -64,10 +64,12 @@ public class RelayManager : UnitySingleton<RelayManager>
             NetworkManager.Singleton.StartClient();
 
             Debug.Log($"加入Relay: {joinCode}");
+            return true;
         }
         catch (RelayServiceException e)
         {
-            Debug.LogError($"加入Relay錯誤: {e}");
+            Debug.LogError($"Join Code:{joinCode} 加入Relay錯誤: {e}");
+            return false;
         }
     }
 }

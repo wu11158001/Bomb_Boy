@@ -10532,7 +10532,7 @@ GameObject:
   - component: {fileID: 4134103170742581875}
   - component: {fileID: 6117042638198463192}
   m_Layer: 9
-  m_Name: Body
+  m_Name: BoySkin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15714,7 +15714,8 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   TagObj: {fileID: 2405251723319569286}
   DieEffect: {fileID: 5366800509026063260}
-  Body: {fileID: 4109586504806703338}
+  BoySkeleton: {fileID: 8412148152089133573}
+  BoySkin: {fileID: 4109586504806703338}
 --- !u!114 &6955880700343806919
 MonoBehaviour:
   m_ObjectHideFlags: 0

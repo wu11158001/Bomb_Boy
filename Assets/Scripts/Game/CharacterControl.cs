@@ -2,13 +2,14 @@ using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
+using System;
 
 public class CharacterControl : BaseNetworkObject
 {
     [SerializeField] GameObject TagObj;
     [SerializeField] ParticleSystem DieEffect;
-    [SerializeField] GameObject Body;
+    [SerializeField] Transform BoySkeleton;
+    [SerializeField] GameObject BoySkin;
 
     private Rigidbody _rigidbody;
     private Vector3 _movement;
@@ -28,6 +29,9 @@ public class CharacterControl : BaseNetworkObject
     private bool _isFirstUpdateData;
     // 是否該角色玩家已斷線
     private bool _isLocalDisconnect;
+
+    // 暱稱文字
+    private CharacterNickname characterNickname;
 
     private GamePlayerData _gamePlayerData;
 
@@ -65,15 +69,20 @@ public class CharacterControl : BaseNetworkObject
             GameView gameView = FindAnyObjectByType<GameView>();
             gameView.ShowGameStart();
         }
+        else
+        {
+            if (IsServer)
+            {
+                _animator.SetBool(_isMove_Hash, false);
+            }
+        }
     }
 
     private void Update()
     {
-        if (!IsOwner) return;
-
         _movement = Vector3.zero;
-        _animator.SetBool(_isMove_Hash, _movement.x != 0 || _movement.z != 0);
 
+        if (!IsOwner) return;
         if (_gamePlayerData.IsDie) return;
         if (_gamePlayerData.IsStopAction) return;
         if (_isLocalDisconnect) return;
@@ -83,6 +92,8 @@ public class CharacterControl : BaseNetworkObject
         if (Input.GetKey(KeyCode.LeftArrow)) _movement.x = -1;
         if (Input.GetKey(KeyCode.RightArrow)) _movement.x = 1;
         if (Input.GetKeyDown(KeyCode.Space)) SpawnBomb();
+
+        _animator.SetBool(_isMove_Hash, _movement.x != 0 || _movement.z != 0);
     }
 
     private void FixedUpdate()
@@ -121,12 +132,11 @@ public class CharacterControl : BaseNetworkObject
         if (_gamePlayerData.IsDie) return;
         if (_isLocalDisconnect) return;
 
+        // 找最近的地板
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Ground}"))
         {
             GameObject collidedObject = collision.gameObject;
             float distanceToPlayer = Vector3.Distance(transform.position, collidedObject.transform.position);
-
-            // 找最近的地板
             if (_nearestGrounds == null || distanceToPlayer < Vector3.Distance(transform.position, _nearestGrounds.transform.position))
             {
                 _nearestGrounds = collidedObject;
@@ -186,8 +196,55 @@ public class CharacterControl : BaseNetworkObject
     public void SetNicknameText(string nickname)
     {
         GameObject characterNicknameObj = SOManager.I.NormalObject_SO.GameObjectList[0];
-        CharacterNickname characterNickname = Instantiate(characterNicknameObj, ViewManager.I.CurrSceneCanvasRt).GetComponent<CharacterNickname>();
+        characterNickname = Instantiate(characterNicknameObj, ViewManager.I.CurrSceneCanvasRt).GetComponent<CharacterNickname>();
         characterNickname.SetFollowCharacter(transform, nickname, IsOwner);
+    }
+
+    /// <summary>
+    /// 角色躲藏
+    /// </summary>
+    /// <param name="isMasking">進入/離開</param>
+    public void CharacterHide(bool isMasking)
+    {
+        StartCoroutine(IHideEffect(isMasking));
+    }
+
+    /// <summary>
+    /// 躲藏效果
+    /// </summary>
+    /// <param name="isMasking"></param>
+    /// <returns></returns>
+    private IEnumerator IHideEffect(bool isMasking)
+    {
+        // 暱稱
+        if (characterNickname != null)
+        {
+            characterNickname.gameObject.SetActive(!isMasking);
+        }
+
+        // 本地玩家標示
+        if (IsOwner && !_isLocalDisconnect)
+        {
+            TagObj.SetActive(!isMasking);
+        }
+
+        // 效果時間
+        float during = 0.2f;
+        // 目標角色大小
+        Vector3 targetSize = isMasking ? new Vector3(0.1f, 0.1f, 0.1f) : Vector3.one;
+        // 當前角色大小
+        Vector3 currSize = BoySkeleton.localScale;
+
+        DateTime startTime = DateTime.Now;
+        while ((DateTime.Now - startTime).TotalSeconds < during)
+        {
+            float progress = (float)(DateTime.Now - startTime).TotalSeconds / during;
+            Vector3 size = Vector3.Lerp(currSize, targetSize, progress);
+            BoySkeleton.localScale = size;
+            yield return null;
+        }
+
+        BoySkeleton.localScale = targetSize;
     }
 
     /// <summary>
@@ -204,7 +261,7 @@ public class CharacterControl : BaseNetworkObject
     /// <returns></returns>
     private IEnumerator IDieBehavior()
     {
-        Body.SetActive(false);
+        BoySkin.SetActive(false);
         _rigidbody.isKinematic = true;
 
         yield return new WaitForSeconds(0.5f);

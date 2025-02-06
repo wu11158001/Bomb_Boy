@@ -11,7 +11,7 @@ public class GameDataManager : UnitySingleton<GameDataManager>
     // 下個地板位置距離
     public const float NextGroundDistance = 1.6f;
     // 遊戲時間
-    public const int GameTime = 10;
+    public const int GameTime = 180;
 }
 
 /// <summary>

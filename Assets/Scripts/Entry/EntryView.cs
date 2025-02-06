@@ -159,7 +159,15 @@ public class EntryView : MonoBehaviour
                         view.SetAskView(text, async () =>
                         {
                             ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
-                            await LobbyManager.I.JoinLobby(lobby);
+                            bool isJoin = await LobbyManager.I.JoinLobby(lobby);
+
+                            // 加入失敗
+                            if (!isJoin)
+                            {
+                                Debug.Log("重新連線加入大廳失敗!");
+                                NetworkManager.Singleton.Shutdown(true);
+                                EnterGame();
+                            }
                         });
                     });
                 });
@@ -226,14 +234,14 @@ public class EntryView : MonoBehaviour
             return;
         }
 
-        IEnterGame();
+        EnterGame();
     }
 
     /// <summary>
     /// 進入遊戲
     /// </summary>
     /// <returns></returns>
-    private async void IEnterGame()
+    private async void EnterGame()
     {
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY, Nickname_If.text);

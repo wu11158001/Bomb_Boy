@@ -116,20 +116,25 @@ public struct GameTerrainData : INetworkSerializable, IEquatable<GameTerrainData
 {
     // 已移除的可擊破物件Id
     public ulong RemoveBreakObstacleId;
+    // 已移除的躲藏物件Id
+    public ulong RemoveHideObjectId;
 
     public bool Equals(GameTerrainData other)
     {
-        return RemoveBreakObstacleId.Equals(other.RemoveBreakObstacleId);
+        return RemoveBreakObstacleId.Equals(other.RemoveBreakObstacleId) &&
+               RemoveHideObjectId.Equals(other.RemoveHideObjectId);
     }
 
     public override int GetHashCode()
     {
         return HashCode.Combine(
-            RemoveBreakObstacleId);
+            RemoveBreakObstacleId,
+            RemoveHideObjectId);
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
         serializer.SerializeValue(ref RemoveBreakObstacleId);
+        serializer.SerializeValue(ref RemoveHideObjectId);
     }
 }

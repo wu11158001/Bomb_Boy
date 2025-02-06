@@ -20,6 +20,8 @@ public enum LayerNameEnum
     Bomb,
     // 角色生成點
     SpawnPoint,
+    // 躲藏物件
+    HideObject,
 }
 
 /// <summary>

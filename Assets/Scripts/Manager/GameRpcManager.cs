@@ -375,6 +375,32 @@ public class GameRpcManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// (Server)角色躲藏
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    /// <param name="isMasking">進入/離開</param>
+    [ServerRpc(RequireOwnership = false)]
+    public void CharacverHideServerRpc(ulong networkObjectId, bool isMasking)
+    {
+        CharacverHideClientRpc(networkObjectId, isMasking);
+    }
+
+    /// <summary>
+    /// (Client)角色躲藏
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    /// <param name="isMasking">進入/離開</param>
+    [ClientRpc]
+    public void CharacverHideClientRpc(ulong networkObjectId, bool isMasking)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(networkObjectId, out NetworkObject networkObject))
+        {
+            CharacterControl characterControl = networkObject.GetComponent<CharacterControl>();
+            characterControl.CharacterHide(isMasking);
+        }
+    }
+
+    /// <summary>
     /// (Server)角色死亡
     /// </summary>
     /// <param name="networkObjectId"></param>

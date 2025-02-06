@@ -13,13 +13,17 @@ public class GameSceneManager : NetworkBehaviour
     // 紀錄掉落道具可擊破物件Id
     private List<NetworkObject> _recodeDropPropsPosIdList;
 
-    // 可擊破物件Id列表
+    // 可擊破物件列表
     private List<NetworkObject> _breakObstacleList;
+    // 遮蔽物件列表
+    private List<NetworkObject> _maskingList;
 
     // 紀錄已移除的可擊破物件Id
-    private NetworkList<GameTerrainData> _gameTerrainDataList = 
+    private NetworkList<GameTerrainData> _removeBreakObstacleId_List = 
         new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
-
+    // 紀錄已移除的躲藏物件Id
+    private NetworkList<GameTerrainData> _removeHideObjectId_List =
+        new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     // 場景中可擊破物數量
     private const int _dropPropsCount = 45;
@@ -32,7 +36,8 @@ public class GameSceneManager : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        _gameTerrainDataList.OnListChanged += BreakObstacleChange;
+        _removeBreakObstacleId_List.OnListChanged += BreakObstacleChange;
+        _removeHideObjectId_List.OnListChanged += MaskingChange;
         InitializeGameSceneManager();
     }
 
@@ -46,13 +51,33 @@ public class GameSceneManager : NetworkBehaviour
     }
 
     /// <summary>
+    /// 遮蔽物件變更物件
+    /// </summary>
+    /// <param name="networkListEvent"></param>
+    private void MaskingChange(NetworkListEvent<GameTerrainData> networkListEvent)
+    {
+        SynchronousScene();
+    }
+
+    /// <summary>
     /// 同步場景
     /// </summary>
     public void SynchronousScene()
     {
-        foreach (var gameTerrainData in _gameTerrainDataList)
+        // 可擊破物件
+        foreach (var breakObstacle in _removeBreakObstacleId_List)
         {
-            NetworkObject networkObject = _breakObstacleList.Where(x => x.NetworkObjectId == gameTerrainData.RemoveBreakObstacleId).FirstOrDefault();
+            NetworkObject networkObject = _breakObstacleList.Where(x => x.NetworkObjectId == breakObstacle.RemoveBreakObstacleId).FirstOrDefault();
+            if (networkObject != null)
+            {
+                networkObject.gameObject.SetActive(false);
+            }
+        }
+
+        // 遮蔽物件
+        foreach (var masking in _removeHideObjectId_List)
+        {
+            NetworkObject networkObject = _maskingList.Where(x => x.NetworkObjectId == masking.RemoveHideObjectId).FirstOrDefault();
             if (networkObject != null)
             {
                 networkObject.gameObject.SetActive(false);
@@ -65,7 +90,7 @@ public class GameSceneManager : NetworkBehaviour
     /// </summary>
     public void InitializeGameSceneManager()
     {
-        // 場景中可擊破物件
+        // 可擊破物件
         _breakObstacleList = new();
         List<GameObject>  breakObstacleList = GameObject.FindGameObjectsWithTag($"{LayerNameEnum.BreakObstacle}").ToList();
         foreach (var breakObstacle in breakObstacleList)
@@ -74,9 +99,20 @@ public class GameSceneManager : NetworkBehaviour
             _breakObstacleList.Add(networkObject);
         }
 
+        // 遮蔽物件
+        _maskingList = new();
+        List<GameObject> maskingList = GameObject.FindGameObjectsWithTag($"{LayerNameEnum.HideObject}").ToList();
+        foreach (var masking in maskingList)
+        {
+            NetworkObject networkObject = masking.GetComponent<NetworkObject>();
+            _maskingList.Add(networkObject);
+        }
+
+
         if (IsServer)
         {
-            _gameTerrainDataList.Clear();
+            _removeBreakObstacleId_List.Clear();
+            _removeHideObjectId_List.Clear();
 
             // 設置掉落道具位置            
             List<NetworkObject> tempBreakObstacle = _breakObstacleList.Select(x => x).ToList();
@@ -111,6 +147,21 @@ public class GameSceneManager : NetworkBehaviour
         {
             RemoveBreakObstacleId = networkObjectId,
         };
-        _gameTerrainDataList.Add(gameTerrainData);
+        _removeBreakObstacleId_List.Add(gameTerrainData);
+    }
+
+    /// <summary>
+    /// 消除遮蔽物件
+    /// </summary>
+    /// <param name="networkObjectId"></param>
+    public void DespawnMasking(ulong networkObjectId)
+    {
+        if (!IsServer) return;
+
+        GameTerrainData gameTerrainData = new()
+        {
+            RemoveHideObjectId = networkObjectId,
+        };
+        _removeHideObjectId_List.Add(gameTerrainData);
     }
 }

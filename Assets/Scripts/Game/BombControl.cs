@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 public class BombControl : BaseNetworkObject
 {
+    [SerializeField] GameObject BodySkin;
+    [SerializeField] GameObject Particle;
+
     private Collider _bombCollider;
     // 自身碰撞射線範圍
     private Vector3 _boxSize = new(1.6f, 0, 1.6f);
@@ -42,15 +45,24 @@ public class BombControl : BaseNetworkObject
     private void Start()
     {
         // 初始忽略當前位置的角色碰撞
-        Collider[] colliders = Physics.OverlapBox(transform.position, _boxSize);
+        Collider[] colliders = Physics.OverlapBox(transform.position, _boxSize / 2);
         foreach (Collider collider in colliders)
         {
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))
             {
                 /*接觸角色*/
+
                 Collider playerCollider = collider.gameObject.GetComponent<CapsuleCollider>();
                 Physics.IgnoreCollision(_bombCollider, playerCollider, true);
                 _ignorCharacterList.Add(collider.gameObject);
+            }
+
+            if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.HideObject}"))
+            {
+                /*接觸躲避物件*/
+
+                BodySkin.SetActive(false);
+                Particle.SetActive(false);
             }
         }
     }

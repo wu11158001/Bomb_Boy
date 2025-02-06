@@ -10053,6 +10053,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  BodySkin: {fileID: 5602313067825155477}
+  Particle: {fileID: 6050976085611557695}
+  CharacterObjectId_NV:
+    m_InternalValue: 0
 --- !u!114 &3842852318085498804
 MonoBehaviour:
   m_ObjectHideFlags: 0

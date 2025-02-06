@@ -86,9 +86,24 @@ public class ExplosionControl : BaseNetworkObject
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.BreakObstacle}"))
             {
                 /*接觸可擊破物*/
+
                 NetworkObject networkObject = collider.gameObject.GetComponent<NetworkObject>();
                 GameSceneManager.I.DespawnBreakObstacle(networkObject.NetworkObjectId);
                 LastCount = 0;
+            }
+
+            if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.HideObject}"))
+            {
+                /*接觸躲藏物件*/
+
+                NetworkObject networkObject = collider.gameObject.GetComponent<NetworkObject>();
+                GameSceneManager.I.DespawnMasking(networkObject.NetworkObjectId);
+
+                // 中心點在躲藏物件爆炸等級不減少
+                if (!IsCenterExplosion)
+                {
+                    LastCount = 0;
+                }
             }
 
             if (collider.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))

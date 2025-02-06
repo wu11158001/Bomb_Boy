@@ -54,7 +54,8 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
             for (int i = 0; i < queryResponse.Results.Count; i++)
             {
-                if (queryResponse.Results[i].Id == lobbyId)
+                if (queryResponse.Results[i].Id == lobbyId &&
+                    queryResponse.Results[i].Players.Count > 0)
                 {
                     return queryResponse.Results[i];
                 }
@@ -89,6 +90,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             // 創建Lobby
             CreateLobbyOptions createLobbyOptions = new()
             {
+                Player = new Player(),
                 Data = new Dictionary<string, DataObject>()
                 {
                     // Relay加入代碼
@@ -116,7 +118,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     /// 加入大廳
     /// </summary>
     /// <param name="joinLobby"></param>
-    public async Task JoinLobby(Lobby joinLobby)
+    public async Task<bool> JoinLobby(Lobby joinLobby)
     {
         try
         {
@@ -126,8 +128,18 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             string relayJoinCode = joinLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
 
             // 加入Relay
-            await RelayManager.I.JoinRelay(relayJoinCode);
+            bool isJoinRelay = await RelayManager.I.JoinRelay(relayJoinCode);
+            if (!isJoinRelay)
+            {
+                return false;
+            }
+
             CurrRelayJoinCode = relayJoinCode;
+
+            JoinLobbyByIdOptions joinLobbyByIdOptions = new()
+            {
+                Player = new Player(),
+            };
 
             // 加入Lobby
             JoinedLobby = await LobbyService.Instance.JoinLobbyByIdAsync(joinLobby.Id);
@@ -137,10 +149,12 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
             Debug.Log($"加入大廳, LobbyId: {JoinedLobby.Id}");
+            return true;
         }
         catch (LobbyServiceException e)
         {
             Debug.LogError($"加入大廳錯誤: {e}");
+            return false;
         }
     }
 
@@ -154,6 +168,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
         {
             QuickJoinLobbyOptions quickJoinLobbyOptions = new()
             {
+                Player = new Player(),
                 Filter = new List<QueryFilter>()
                 {
                     {new QueryFilter( QueryFilter.FieldOptions.S1, $"{LobbyDataKey.In_Team}", QueryFilter.OpOptions.EQ) },
