@@ -812,6 +812,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: EntryView
       objectReference: {fileID: 0}
+    - target: {fileID: 1340286370158648491, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4763012316736879990, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
       propertyPath: m_Pivot.y
       value: 0
