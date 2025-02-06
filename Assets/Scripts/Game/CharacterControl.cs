@@ -25,8 +25,8 @@ public class CharacterControl : BaseNetworkObject
     // 攝影機跟隨腳本
     CameraFollow cameraFollow;
 
-    // 是否已首次更新資料
-    private bool _isFirstUpdateData;
+    // 是否已更新資料
+    private bool _isUpdateDate;
     // 是否該角色玩家已斷線
     private bool _isLocalDisconnect;
 
@@ -51,20 +51,24 @@ public class CharacterControl : BaseNetworkObject
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+        _isUpdateDate = false;
 
         TagObj.SetActive(IsOwner);
         SetCameraFollow();
-        SetNicknameText($"{_gamePlayerData.Nickname}");
+        UpdateCharacterData();
     }
 
     protected override void OnOwnershipChanged(ulong previous, ulong current)
     {
         Debug.Log($"角色 {thisObjectId} 擁有權更改: {previous} => {current}");
         _isLocalDisconnect = IsServer;
+        _isUpdateDate = false;
+
         if (!IsServer && IsOwner)
-        {            
+        {
+            TagObj.SetActive(IsOwner);
             SetCameraFollow();
-            _gamePlayerData = GameRpcManager.I.GetGamePlayerData(thisObjectId);
+            UpdateCharacterData();
             GameSceneManager.I.SynchronousScene();
             GameView gameView = FindAnyObjectByType<GameView>();
             gameView.ShowGameStart();
@@ -181,11 +185,17 @@ public class CharacterControl : BaseNetworkObject
     {
         _gamePlayerData = GameRpcManager.I.GetGamePlayerData(thisObjectId);
 
-        // 首次更新資料
-        if (_isFirstUpdateData == false)
+        if (!string.IsNullOrEmpty($"{_gamePlayerData.Nickname}") && 
+            _isUpdateDate == false)
         {
+            _isUpdateDate = true;
             SetNicknameText($"{_gamePlayerData.Nickname}");
-            _isFirstUpdateData = true;
+        }
+
+        if (_animator != null &&
+            _gamePlayerData.IsStopAction)
+        {
+            _animator.SetBool(_isMove_Hash, false);
         }
     }
 

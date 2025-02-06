@@ -11,7 +11,6 @@ public class GamePlayerItem : MonoBehaviour
     [SerializeField] Toggle Mute_Tog;
 
     private int _itemIndex;
-    private bool _isFirstGetData;
     private VivoxParticipant _vivoxParticipant;
 
     private void Awake()
@@ -35,19 +34,11 @@ public class GamePlayerItem : MonoBehaviour
                 Node_Obj.SetActive(true);
             }
 
-            if (!_isFirstGetData)
-            {
-                _isFirstGetData = true;
-                _vivoxParticipant = VivoxManager.I.VivoxParticipantList[_itemIndex];
-                Mute_Tog.isOn = _vivoxParticipant.IsMuted;
-            }
+            _vivoxParticipant = VivoxManager.I.VivoxParticipantList[_itemIndex];
+            Mute_Tog.isOn = _vivoxParticipant.IsMuted;
 
-            if (_vivoxParticipant != null &&
-                !string.IsNullOrEmpty(_vivoxParticipant.DisplayName))
-            {
-                Nickname_Txt.text = _vivoxParticipant.DisplayName;
-                SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
-            }
+            Nickname_Txt.text = _vivoxParticipant.DisplayName;
+            SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
         }
         else
         {

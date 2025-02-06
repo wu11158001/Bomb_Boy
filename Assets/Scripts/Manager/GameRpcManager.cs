@@ -611,7 +611,7 @@ public class GameRpcManager : NetworkBehaviour
             }
         }
 
-        Debug.LogError($"玩家: {networkObjectId} 獲取玩家資料錯誤");
+        Debug.Log($"沒有找到 玩家: {networkObjectId} 玩家資料!!!");
         return new();
     }
 
