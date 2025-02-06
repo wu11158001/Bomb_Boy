@@ -167,12 +167,8 @@ public class LobbyView : MonoBehaviour
             _lobbyPlayerItem_Array[i].UpdateLobbyPlayerItem(playerData_List[i]);
         }
 
-        // 所有玩家都已進入大廳
-        if (playerData_List.Count == LobbyManager.I.JoinedLobby.Players.Count)
-        {
-            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
-            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
-        }        
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
     }
     
     /// <summary>

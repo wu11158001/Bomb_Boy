@@ -12910,8 +12910,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 26.235723, y: 3.0966487, z: 2.982316}
-  m_Center: {x: -9.99013, y: -1.0483243, z: -0.045446873}
+  m_Size: {x: 26.235723, y: 5, z: 2.982316}
+  m_Center: {x: -9.99013, y: 1.51, z: -0.045446873}
 --- !u!1 &2115817355544456608
 GameObject:
   m_ObjectHideFlags: 0
@@ -12971,8 +12971,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 26.243443, y: 0.84286463, z: 2.857792}
-  m_Center: {x: -10.002613, y: 0.07856768, z: -2.626536}
+  m_Size: {x: 26.243443, y: 5, z: 2.857792}
+  m_Center: {x: -10.002613, y: 1.51, z: -2.626536}
 --- !u!1 &2122342068164833874
 GameObject:
   m_ObjectHideFlags: 0
@@ -41376,8 +41376,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.514511, y: 0.8428646, z: 25.57674}
-  m_Center: {x: 1.8825588, y: 0.07856768, z: 11.585051}
+  m_Size: {x: 2.514511, y: 5, z: 25.57674}
+  m_Center: {x: 1.8825588, y: 1.51, z: 11.585051}
 --- !u!1 &7060864487353182429
 GameObject:
   m_ObjectHideFlags: 0
@@ -48982,8 +48982,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 2.43361, y: 0.8428646, z: 25.50079}
-  m_Center: {x: 4.0004754, y: 0.07856768, z: 11.547075}
+  m_Size: {x: 2.43361, y: 5, z: 25.50079}
+  m_Center: {x: 4.0004754, y: 1.51, z: 11.547075}
 --- !u!1 &8243239280143016686
 GameObject:
   m_ObjectHideFlags: 0
@@ -70887,7 +70887,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8159817180795608946, guid: ee8d808b643765e41881c44b2d6a977b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7.6
+      value: -5.9
       objectReference: {fileID: 0}
     - target: {fileID: 8159817180795608946, guid: ee8d808b643765e41881c44b2d6a977b, type: 3}
       propertyPath: m_LocalPosition.y
@@ -90511,7 +90511,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8159817180795608946, guid: ee8d808b643765e41881c44b2d6a977b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -12.400001
+      value: -14
       objectReference: {fileID: 0}
     - target: {fileID: 8159817180795608946, guid: ee8d808b643765e41881c44b2d6a977b, type: 3}
       propertyPath: m_LocalPosition.y
