@@ -14,6 +14,7 @@ public class LobbyPlayerItem : MonoBehaviour
     [SerializeField] TextMeshProUGUI Nickname_Txt;
     [SerializeField] TextMeshProUGUI Prepare_Txt;
     [SerializeField] GameObject SpeechDetected_Obj;
+    [SerializeField] GameObject SelfIcon_Obj;
 
     private VivoxParticipant _vivoxParticipant;
 
@@ -35,6 +36,7 @@ public class LobbyPlayerItem : MonoBehaviour
         MigrateHost_Btn.gameObject.SetActive(false);
         Host_Obj.SetActive(false);
         SpeechDetected_Obj.SetActive(false);
+        SelfIcon_Obj.SetActive(false);
 
         Nickname_Txt.text = "";
         LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Waiting to join", (text) =>
@@ -55,6 +57,8 @@ public class LobbyPlayerItem : MonoBehaviour
         bool isLobbyHost = LobbyManager.I.JoinedLobby.HostId == lobbyPlayerData.AuthenticationPlayerId;
         bool isLocalHost = LobbyManager.I.IsLobbyHost();
         bool isLocal = lobbyPlayerData.NetworkClientId == NetworkManager.Singleton.LocalClientId;
+
+        SelfIcon_Obj.SetActive(isLocal);
 
         // 踢除按鈕
         Kick_Btn.gameObject.SetActive(isLocalHost && !isLocal);

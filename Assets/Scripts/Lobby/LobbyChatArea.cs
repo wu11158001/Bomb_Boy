@@ -84,7 +84,6 @@ public class LobbyChatArea : MonoBehaviour
         return Chat_Sr.verticalNormalizedPosition <= 0.01f;
     }
 
-    public bool ttt;
     /// <summary>
     /// 顯示聊天訊息
     /// </summary>
@@ -94,7 +93,6 @@ public class LobbyChatArea : MonoBehaviour
         bool isLocal = chatData.AuthenticationPlayerId == AuthenticationService.Instance.PlayerId;
         bool isBotton = IsAtBottom();
 
-        isLocal = ttt;
         LobbyChatItem lobbyChatItem = Instantiate(LobbyChatItemSample, ChatNode).GetComponent<LobbyChatItem>();
         lobbyChatItem.gameObject.SetActive(true);
         Vector2 itemSizeDelta = lobbyChatItem.SetLobbyChatItem(chatData, isLocal);
