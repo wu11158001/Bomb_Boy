@@ -107,7 +107,7 @@ public class GameView : MonoBehaviour
 
             LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, "Draw", (text) =>
             {
-                GameResult_Txt.text = text;
+                GameResult_Txt.text = $"<color=#57E2B3>{text}</color>";
             });
         }
         else
@@ -120,9 +120,14 @@ public class GameView : MonoBehaviour
                 $"Victory" :
                 $"Game Over";
 
+            string color =
+                isVictory ?
+                "#E2C357" :
+                "#57BBE2";
+
             LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, resultStr, (text) =>
             {
-                GameResult_Txt.text = text;
+                GameResult_Txt.text = $"<color={color}>{text}</color>";
             });
 
 

@@ -8,11 +8,14 @@ public class LobbyChatArea : MonoBehaviour
 {
     [SerializeField] Toggle SelfMute_Tog;
     [SerializeField] TMP_InputField Chat_If;
-    [SerializeField] RectTransform Chat_Sr;
+    [SerializeField] ScrollRect Chat_Sr;
     [SerializeField] RectTransform ChatNode;
     [SerializeField] VerticalLayoutGroup ChatNode_VLayout;
     [SerializeField] LobbyChatItem LobbyChatItemSample;
     [SerializeField] Button NewMsg_Btn;
+
+    // 聊天區域大小Y
+    private float ChatAreaSizeY = 1020;
 
     private void Start()
     {
@@ -43,12 +46,6 @@ public class LobbyChatArea : MonoBehaviour
                 Chat_If.ActivateInputField();
             }
         }
-
-        // 滑條移動至最下方
-        if (ChatNode.anchoredPosition.y >= ChatNode.sizeDelta.y - Chat_Sr.sizeDelta.y - 70)
-        {
-            NewMsg_Btn.gameObject.SetActive(false);
-        }
     }
 
     /// <summary>
@@ -67,8 +64,27 @@ public class LobbyChatArea : MonoBehaviour
         {
             MoveToNewMsg();
         });
+
+        // 滾動條事件
+        Chat_Sr.onValueChanged.AddListener((position) =>
+        {
+            if (IsAtBottom())
+            {
+                NewMsg_Btn.gameObject.SetActive(false);
+            }
+        });
     }
 
+    /// <summary>
+    /// 判斷滾動條是否在最底部
+    /// </summary>
+    /// <returns></returns>
+    private bool IsAtBottom()
+    {
+        return Chat_Sr.verticalNormalizedPosition <= 0.01f;
+    }
+
+    public bool ttt;
     /// <summary>
     /// 顯示聊天訊息
     /// </summary>
@@ -76,8 +92,9 @@ public class LobbyChatArea : MonoBehaviour
     public void ShowChatMessage(ChatData chatData)
     {
         bool isLocal = chatData.AuthenticationPlayerId == AuthenticationService.Instance.PlayerId;
-        float originalSize = Chat_Sr.sizeDelta.y;
+        bool isBotton = IsAtBottom();
 
+        isLocal = ttt;
         LobbyChatItem lobbyChatItem = Instantiate(LobbyChatItemSample, ChatNode).GetComponent<LobbyChatItem>();
         lobbyChatItem.gameObject.SetActive(true);
         Vector2 itemSizeDelta = lobbyChatItem.SetLobbyChatItem(chatData, isLocal);
@@ -94,17 +111,13 @@ public class LobbyChatArea : MonoBehaviour
         }
         else
         {
-            if (ChatNode.childCount < 2) return;
-
-            RectTransform lastItem = ChatNode.GetChild(ChatNode.childCount - 2).GetComponent<RectTransform>();
-            float movePos = ChatNode.sizeDelta.y - originalSize - lastItem.sizeDelta.y - 60;
-            if (ChatNode.anchoredPosition.y >= movePos)
+            if (isBotton)
             {
                 MoveToNewMsg();
             }
             else
             {
-                if (ChatNode.sizeDelta.y > Chat_Sr.sizeDelta.y)
+                if (Mathf.Abs(ChatNode.sizeDelta.y) > ChatAreaSizeY)
                 {
                     NewMsg_Btn.gameObject.SetActive(true);
                 }                
@@ -117,7 +130,7 @@ public class LobbyChatArea : MonoBehaviour
     /// </summary>
     private void MoveToNewMsg()
     {
-        float posY = Mathf.Max(0, ChatNode.sizeDelta.y - Chat_Sr.sizeDelta.y);
+        float posY = Mathf.Max(0, ChatNode.sizeDelta.y - ChatAreaSizeY);
         ChatNode.anchoredPosition = new Vector2(0, posY);
 
         NewMsg_Btn.gameObject.SetActive(false);

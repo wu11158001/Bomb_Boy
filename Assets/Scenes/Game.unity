@@ -481,30 +481,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2004625270}
     m_Modifications:
-    - target: {fileID: 5499480060231401592, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5499480060231401592, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5499480060231401592, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5499480060231401592, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5499480060231401592, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5499480060231401592, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8153117508428835491, guid: 43565390e565e2f45b47dc7e0297d66a, type: 3}
       propertyPath: m_Name
       value: GameView

@@ -25,16 +25,20 @@ public class DropProps : BaseNetworkObject
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (!IsServer) return;
-        if (_isGet) return;
-
         // 接觸角色
         if (collision.gameObject.layer == LayerMask.NameToLayer($"{LayerNameEnum.Character}"))
         {
             _isGet = true;
-            NetworkObject networkObject = collision.gameObject.GetComponent<NetworkObject>();
-            GameRpcManager.I.GetDropPropsServerRpc(networkObject.NetworkObjectId, _dropPropsType.Value);
-            GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
+
+
+            if (IsServer && !_isGet)
+            {
+                NetworkObject networkObject = collision.gameObject.GetComponent<NetworkObject>();
+                GameRpcManager.I.GetDropPropsServerRpc(networkObject.NetworkObjectId, _dropPropsType.Value);
+                GameRpcManager.I.DespawnObjectServerRpc(thisObjectId);
+            }
+
+            gameObject.SetActive(false);
         }
     }
 

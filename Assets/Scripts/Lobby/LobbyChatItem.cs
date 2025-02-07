@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class LobbyChatItem : MonoBehaviour
 {
@@ -62,7 +63,12 @@ public class LobbyChatItem : MonoBehaviour
                 ChatMsg_Txt.rectTransform.anchoredPosition.y);
         }
 
-        Nickname_Txt.text = chatData.Nickname;
+        DateTime currTime = DateTime.Now;
+        string formattedDate = currTime.ToString("yyyy/MM/dd HH : mm");
+        Nickname_Txt.text =
+            isLocal ?
+            $"<color=#CCC6C6><size=18>{formattedDate}</size></color>  {chatData.Nickname}" :
+            $"{chatData.Nickname}  <color=#CCC6C6><size=18>{formattedDate}</size></color>";
         ChatMsg_Txt.text = chatData.ChatMsg;
 
         // 訊息文字大小
