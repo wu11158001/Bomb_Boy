@@ -134,7 +134,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
         {
             PlayerId = AuthenticationService.Instance.PlayerId,
             DisplayName = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY),
-            EnableTTS = true,
+            EnableTTS = false,
         };
         
         await VivoxService.Instance.LoginAsync(options);
