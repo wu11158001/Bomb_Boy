@@ -6,4 +6,5 @@ public class SOManager : UnitySingleton<SOManager>
     public GameObject_SO NormalObject_SO;
     public Materail_SO DropProps_SO;
     public View_SO View_SO;
+    public AudioClip_SO AudioClip_SO;
 }

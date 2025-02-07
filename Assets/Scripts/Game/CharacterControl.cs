@@ -169,6 +169,8 @@ public class CharacterControl : BaseNetworkObject
         if (_nearestGrounds == null) return;
         if (_gamePlayerData.BombCount <= 0) return;
 
+        AudioManager.I.PlaySound(SoundEnum.PlantingTheBomb);
+
         Vector3 offset = GameDataManager.I.CreateSceneObjectOffset;
         Vector3 spawnPosition = _nearestGrounds.transform.position + offset + Vector3.up * _nearestGrounds.transform.lossyScale.y / 2;
 
@@ -216,6 +218,11 @@ public class CharacterControl : BaseNetworkObject
     /// <param name="isMasking">進入/離開</param>
     public void CharacterHide(bool isMasking)
     {
+        if (IsOwner)
+        {
+            AudioManager.I.PlaySound(SoundEnum.HideObject);
+        }
+
         StartCoroutine(IHideEffect(isMasking));
     }
 

@@ -15,6 +15,13 @@ public class ExplosionControl : BaseNetworkObject
     // 下個爆炸位置列表
     private Vector3[] _nextCenters;
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+
+        AudioManager.I.PlaySound(SoundEnum.Explosion, true);
+    }
+
     private void OnDrawGizmos()
     {
         // 下個爆炸位置射線

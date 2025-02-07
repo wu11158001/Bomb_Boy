@@ -33,6 +33,7 @@ public class LobbyView : MonoBehaviour
 
     private void Start()
     {
+        AudioManager.I.PlayBGM(BGNEnum.EntryAndLobby);
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_JOIN_LOBBY_ID, "");
 
         // 產生大廳玩家項目
@@ -60,6 +61,7 @@ public class LobbyView : MonoBehaviour
         // 離開按鈕
         Leave_Btn.onClick.AddListener(() =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Cancel);
             if (LobbyManager.I.IsLobbyHost())
             {
                 LobbyRpcManager.I.HostLeaveLobbyServerRpc();
@@ -70,12 +72,14 @@ public class LobbyView : MonoBehaviour
 
         // 準備 / 開始按鈕
         PrepareOrStart_Btn.onClick.AddListener(async () =>
-        {
+        {           
             if (NetworkManager.Singleton.IsConnectedClient)
             {
                 if (LobbyManager.I.IsLobbyHost())
                 {
                     /*是Host*/
+
+                    AudioManager.I.PlaySound(SoundEnum.Confirm);
 
                     /*if (NetworkManager.Singleton.ConnectedClients.Count < 2)
                     {

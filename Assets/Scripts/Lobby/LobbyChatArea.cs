@@ -56,12 +56,14 @@ public class LobbyChatArea : MonoBehaviour
         // 本地玩家靜音Tog
         SelfMute_Tog.onValueChanged.AddListener((isOn) =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Click);
             VivoxManager.I.LocalMute(isOn);
         });
 
         // 移動至新訊息按鈕
         NewMsg_Btn.onClick.AddListener(() =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Click);
             MoveToNewMsg();
         });
 
@@ -90,6 +92,8 @@ public class LobbyChatArea : MonoBehaviour
     /// <param name="chatData"></param>
     public void ShowChatMessage(ChatData chatData)
     {
+        AudioManager.I.PlaySound(SoundEnum.ChatMsg);
+
         bool isLocal = chatData.AuthenticationPlayerId == AuthenticationService.Instance.PlayerId;
         bool isBotton = IsAtBottom();
 

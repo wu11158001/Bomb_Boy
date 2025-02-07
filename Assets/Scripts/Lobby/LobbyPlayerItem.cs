@@ -16,6 +16,7 @@ public class LobbyPlayerItem : MonoBehaviour
     [SerializeField] GameObject SpeechDetected_Obj;
     [SerializeField] GameObject SelfIcon_Obj;
 
+    private LobbyPlayerData _previousLobbyPlayerData;
     private VivoxParticipant _vivoxParticipant;
 
     private void Update()
@@ -65,6 +66,7 @@ public class LobbyPlayerItem : MonoBehaviour
         Kick_Btn.onClick.RemoveAllListeners();
         Kick_Btn.onClick.AddListener(() =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Click);
             LobbyRpcManager.I.KickLobbyPlayerServerRpc(lobbyPlayerData.NetworkClientId);
             Kick_Btn.onClick.RemoveAllListeners();
         });
@@ -95,6 +97,7 @@ public class LobbyPlayerItem : MonoBehaviour
         MigrateHost_Btn.onClick.RemoveAllListeners();
         MigrateHost_Btn.onClick.AddListener(() =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Click);
             LobbyRpcManager.I.MigrateHostNotifyServerRpc(lobbyPlayerData.AuthenticationPlayerId);
         });
 
@@ -114,7 +117,23 @@ public class LobbyPlayerItem : MonoBehaviour
             else
             {
                 Prepare_Txt.text = "";
-            }            
+            }
+
+            // 音效
+            if (_previousLobbyPlayerData.IsPrepare != lobbyPlayerData.IsPrepare &&
+                _previousLobbyPlayerData.Nickname == lobbyPlayerData.Nickname)
+            {
+                if (lobbyPlayerData.IsPrepare)
+                {
+                    AudioManager.I.PlaySound(SoundEnum.Click);
+                }
+                else
+                {
+                    AudioManager.I.PlaySound(SoundEnum.Cancel);
+                }
+            }
         });
+
+        _previousLobbyPlayerData = lobbyPlayerData;
     }
 }

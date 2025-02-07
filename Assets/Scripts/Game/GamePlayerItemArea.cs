@@ -9,6 +9,7 @@ public class GamePlayerItemArea : MonoBehaviour
     [SerializeField] Button GamePlayerItemSwitch_Btn;
     [SerializeField] RectTransform GamePlayerItemAreaNode;
     [SerializeField] GamePlayerItem GamePlayerItemSample;
+    [SerializeField] RectTransform MoveAreaNode;
 
     [Space(30)]
     [Header("項目開關參數")]
@@ -59,6 +60,8 @@ public class GamePlayerItemArea : MonoBehaviour
         // 遊戲玩家項目顯示開關
         GamePlayerItemSwitch_Btn.onClick.AddListener(() =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Click);
+
             if (_coroutine != null) return;
             _isDisplay = !_isDisplay;
             ItemSwitchEffect(_isDisplay);
@@ -87,29 +90,29 @@ public class GamePlayerItemArea : MonoBehaviour
     {
         if (isDisplay)
         {
-            while (GamePlayerItemAreaNode.anchoredPosition.x > 0)
+            while (MoveAreaNode.anchoredPosition.x > 0)
             {
-                GamePlayerItemAreaNode.Translate(new Vector3(-SwitchEffectSpeed * Time.deltaTime, 0, 0), Space.Self);
+                MoveAreaNode.Translate(new Vector3(-SwitchEffectSpeed * Time.deltaTime, 0, 0), Space.Self);
                 yield return null;
             }
 
-            GamePlayerItemAreaNode.anchoredPosition = Vector2.zero;
+            MoveAreaNode.anchoredPosition = Vector2.zero;
         }
         else
         {
-            while (GamePlayerItemAreaNode.anchoredPosition.x > -50)
+            while (MoveAreaNode.anchoredPosition.x > -50)
             {
-                GamePlayerItemAreaNode.Translate(new Vector3(-SwitchEffectSpeed * 0.5f * Time.deltaTime, 0, 0), Space.Self);
+                MoveAreaNode.Translate(new Vector3(-SwitchEffectSpeed * 0.5f * Time.deltaTime, 0, 0), Space.Self);
                 yield return null;
             }
 
-            while (GamePlayerItemAreaNode.anchoredPosition.x < GamePlayerItemAreaNode.sizeDelta.x)
+            while (MoveAreaNode.anchoredPosition.x < MoveAreaNode.sizeDelta.x)
             {
-                GamePlayerItemAreaNode.Translate(new Vector3(SwitchEffectSpeed * Time.deltaTime, 0, 0), Space.Self);
+                MoveAreaNode.Translate(new Vector3(SwitchEffectSpeed * Time.deltaTime, 0, 0), Space.Self);
                 yield return null;
             }
 
-            GamePlayerItemAreaNode.anchoredPosition = new Vector2(GamePlayerItemAreaNode.sizeDelta.x, 0);
+            MoveAreaNode.anchoredPosition = new Vector2(MoveAreaNode.sizeDelta.x, 0);
         }
 
         _coroutine = null;

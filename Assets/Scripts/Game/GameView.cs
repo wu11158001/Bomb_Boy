@@ -59,6 +59,8 @@ public class GameView : MonoBehaviour
 
         // 紀錄斷線重連資料
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_JOIN_LOBBY_ID, LobbyManager.I.JoinedLobby.Id);
+
+        AudioManager.I.PlayBGM(BGNEnum.Game);
     }
 
     /// <summary>
@@ -69,6 +71,8 @@ public class GameView : MonoBehaviour
         // 退出遊戲按鈕
         ExitGame_Btn.onClick.AddListener(async () =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Cancel);
+
             ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             await LobbyManager.I.LeaveLobby();
             ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
@@ -105,6 +109,8 @@ public class GameView : MonoBehaviour
         {
             /*平手*/
 
+            AudioManager.I.PlaySound(SoundEnum.GameOver);
+
             LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, "Draw", (text) =>
             {
                 GameResult_Txt.text = $"<color=#57E2B3>{text}</color>";
@@ -124,6 +130,8 @@ public class GameView : MonoBehaviour
                 isVictory ?
                 "#E2C357" :
                 "#57BBE2";
+
+            AudioManager.I.PlaySound(isVictory ? SoundEnum.Win :SoundEnum.GameOver);
 
             LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, resultStr, (text) =>
             {
@@ -146,6 +154,8 @@ public class GameView : MonoBehaviour
     {
         InputController_Obj.SetActive(true);
         GameStartCD_Txt.gameObject.SetActive(true);
+
+        AudioManager.I.PlaySound(SoundEnum.Ready);
 
         LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, "Ready!", (text) =>
         {

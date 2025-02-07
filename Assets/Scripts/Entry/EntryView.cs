@@ -87,6 +87,8 @@ public class EntryView : MonoBehaviour
                 break;
         }
 
+        AudioManager.I.PlayBGM(BGNEnum.EntryAndLobby);
+
         string recodeNickname = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY);
 
         Nickname_If.ActivateInputField();
@@ -108,6 +110,7 @@ public class EntryView : MonoBehaviour
         {
             if (isOn)
             {
+                AudioManager.I.PlaySound(SoundEnum.Click);
                 LanguageManager.I.ChangeLanguage(0);
             }
         });
@@ -117,6 +120,7 @@ public class EntryView : MonoBehaviour
         {
             if (isOn)
             {
+                AudioManager.I.PlaySound(SoundEnum.Click);
                 LanguageManager.I.ChangeLanguage(1);
             }
         });
@@ -130,6 +134,7 @@ public class EntryView : MonoBehaviour
         // 加入大廳按鈕
         JoinLobby_Btn.onClick.AddListener(() =>
         {
+            AudioManager.I.PlaySound(SoundEnum.Confirm);
             JudgeEnterGameData();
         });
     }

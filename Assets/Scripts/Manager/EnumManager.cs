@@ -111,5 +111,35 @@ public enum LocalizationTableEnum
     Game_Table,                     // 遊戲
     TipMessage_Table,               // 提示訊息
     Ask_Table,                      // 詢問內容
+    Options_Table,                  // 選項
+}
+#endregion
+
+#region 音樂音效
+/// <summary>
+/// BGM
+/// </summary>
+public enum BGNEnum
+{
+    EntryAndLobby = 0,
+    Game,
+}
+
+/// <summary>
+/// 音效
+/// </summary>
+public enum SoundEnum
+{
+    Click = 0,
+    Cancel,
+    Confirm,
+    Ready,
+    PlantingTheBomb,
+    Explosion,
+    GameOver,
+    Win,
+    ChatMsg,
+    GetDropProps,
+    HideObject,
 }
 #endregion
