@@ -362,7 +362,11 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     /// <returns></returns>
     private async Task JoinVivox()
     {
-        await VivoxManager.I.LoginToVivoxAsync();
+        if (!VivoxManager.I.IsLoginedVivox)
+        {
+            await VivoxManager.I.LoginToVivoxAsync();
+        }
+        
         await VivoxManager.I.JoinGroupChannelAsync(JoinedLobby.Id);
     }
 }

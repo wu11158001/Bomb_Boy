@@ -13,6 +13,9 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     // LobbyView
     private LobbyView _lobbyView;
 
+    // 是否已登入Vivox
+    public bool IsLoginedVivox;
+
     private void OnDestroy()
     {
         UnBindVivoxEvent();
@@ -52,6 +55,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnLoggedInVivox()
     {
         Debug.Log("登入Vivox");
+        IsLoginedVivox = true;
     }
 
     /// <summary>

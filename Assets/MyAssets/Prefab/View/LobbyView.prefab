@@ -966,7 +966,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000928552}
+  m_AnchoredPosition: {x: 0, y: -0.000030517578}
   m_SizeDelta: {x: 0, y: 349.2722}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &369074473609751557
@@ -1125,6 +1125,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 556387615672035360}
+  - component: {fileID: 3093889216071597104}
   - component: {fileID: 469915432902263516}
   - component: {fileID: 8455045159139780855}
   - component: {fileID: 4324631229217084927}
@@ -1155,6 +1156,22 @@ RectTransform:
   m_AnchoredPosition: {x: -10, y: 10}
   m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 1, y: 0}
+--- !u!114 &3093889216071597104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2432309032957049157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e08a19900cc7d3a46b6d264348db7f74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BgColor: {r: 0.21960784, g: 0.22745098, b: 0.2509804, a: 1}
+  OpenColor: {r: 0.8666667, g: 0.8666667, b: 0.8666667, a: 1}
+  CloseColor: {r: 0.827451, g: 0.12156863, b: 0.12156863, a: 1}
+  Mic_Tog: {fileID: 469915432902263516}
 --- !u!114 &469915432902263516
 MonoBehaviour:
   m_ObjectHideFlags: 0

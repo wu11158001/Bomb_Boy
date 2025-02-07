@@ -53,15 +53,16 @@ public class EntryView : MonoBehaviour
             yield return null;
         }
 
+        // 初始化
         LanguageManager.I.InitializeLanguageManager();
         yield return UnityServices.InitializeAsync();
 
-        // 登入完成事件
+        // 用戶登入
         AuthenticationService.Instance.SignedIn += OnSignedIn;
         yield return AuthenticationService.Instance.SignInAnonymouslyAsync();
-        yield return VivoxService.Instance.InitializeAsync();
 
-        // 綁定Vivox事件
+        // Vivox登入
+        yield return VivoxService.Instance.InitializeAsync();
         VivoxManager.I.BindVivoxEvents();
 
         Loading_Obj.SetActive(false);
