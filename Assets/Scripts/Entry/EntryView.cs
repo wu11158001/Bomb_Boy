@@ -53,17 +53,20 @@ public class EntryView : MonoBehaviour
             yield return null;
         }
 
-        // 初始化
-        LanguageManager.I.InitializeLanguageManager();
-        yield return UnityServices.InitializeAsync();
+        if (!GameDataManager.I.IsLogined)
+        {
+            // 初始化
+            LanguageManager.I.InitializeLanguageManager();
+            yield return UnityServices.InitializeAsync();
 
-        // 用戶登入
-        AuthenticationService.Instance.SignedIn += OnSignedIn;
-        yield return AuthenticationService.Instance.SignInAnonymouslyAsync();
+            // 用戶登入
+            AuthenticationService.Instance.SignedIn += OnSignedIn;
+            yield return AuthenticationService.Instance.SignInAnonymouslyAsync();
 
-        // Vivox登入
-        yield return VivoxService.Instance.InitializeAsync();
-        VivoxManager.I.BindVivoxEvents();
+            // Vivox初始化
+            yield return VivoxService.Instance.InitializeAsync();
+            VivoxManager.I.BindVivoxEvents();
+        }       
 
         Loading_Obj.SetActive(false);
         switch (LanguageManager.I.CurrLanguage)
@@ -91,6 +94,8 @@ public class EntryView : MonoBehaviour
 
         ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         EventListener();
+
+        GameDataManager.I.IsLogined = true;
     }
 
     /// <summary>

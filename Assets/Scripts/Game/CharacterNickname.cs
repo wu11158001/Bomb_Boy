@@ -52,6 +52,6 @@ public class CharacterNickname : MonoBehaviour
             $"{new string(nickname.Take(6).ToArray())}..." :
             nickname;
 
-        _thisTextMeshPro.text = $"<color=#{nicknameColor}>{takeNickname}</color>"; ;
+        _thisTextMeshPro.text = $"<color=#{nicknameColor}>{takeNickname}</color>";
     }
 }

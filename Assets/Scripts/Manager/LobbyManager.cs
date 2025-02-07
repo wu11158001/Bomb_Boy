@@ -211,7 +211,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
                 NetworkManager.Singleton.Shutdown(false);
                 await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, AuthenticationService.Instance.PlayerId);
 
-                await VivoxManager.I.LeaveEchoChannelAsync();
+                await VivoxManager.I.LogoutOfVivoxAsync();
 
                 JoinedLobby = null;
 
@@ -362,11 +362,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     /// <returns></returns>
     private async Task JoinVivox()
     {
-        if (!VivoxManager.I.IsLoginedVivox)
-        {
-            await VivoxManager.I.LoginToVivoxAsync();
-        }
-        
+        await VivoxManager.I.LoginToVivoxAsync();
         await VivoxManager.I.JoinGroupChannelAsync(JoinedLobby.Id);
     }
 }

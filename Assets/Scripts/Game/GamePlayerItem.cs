@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Unity.Services.Vivox;
+using System.Linq;
 
 public class GamePlayerItem : MonoBehaviour
 {
@@ -37,7 +38,14 @@ public class GamePlayerItem : MonoBehaviour
             _vivoxParticipant = VivoxManager.I.VivoxParticipantList[_itemIndex];
             Mute_Tog.isOn = _vivoxParticipant.IsMuted;
 
-            Nickname_Txt.text = _vivoxParticipant.DisplayName;
+            // 暱稱文字
+            string takeNickname =
+                _vivoxParticipant.DisplayName.Length > 6 ?
+                $"{new string(_vivoxParticipant.DisplayName.ToArray().Take(6).ToArray())}..." :
+                _vivoxParticipant.DisplayName;
+            Nickname_Txt.text = takeNickname;
+
+            // 語音偵測
             SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
         }
         else
@@ -80,6 +88,15 @@ public class GamePlayerItem : MonoBehaviour
                 }
             }
         });
+    }
+
+    /// <summary>
+    /// 獲取項目激活狀態
+    /// </summary>
+    /// <returns></returns>
+    public bool GetNodeObjActive()
+    {
+        return Node_Obj.activeSelf;
     }
 
     /// <summary>

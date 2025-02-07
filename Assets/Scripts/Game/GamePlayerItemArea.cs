@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Linq;
+using System.Collections.Generic;
 
 public class GamePlayerItemArea : MonoBehaviour
 {
@@ -15,8 +17,16 @@ public class GamePlayerItemArea : MonoBehaviour
     private Coroutine _coroutine;
     private bool _isDisplay;
 
+    private GamePlayerItem[] gamePlayerItems = new GamePlayerItem[4];
+
+    // 背景隨項目數量增加高度
+    private float AreaAddHeight;
+
     private void Start()
     {
+        GridLayoutGroup gridLayoutGroup = GamePlayerItemAreaNode.GetComponent<GridLayoutGroup>();
+        AreaAddHeight = gridLayoutGroup.spacing.y + gridLayoutGroup.cellSize.y;
+
         // 產生遊戲玩家項目
         for (int i = 0; i < GameDataManager.MaxPlayer; i++)
         {
@@ -24,12 +34,21 @@ public class GamePlayerItemArea : MonoBehaviour
             GamePlayerItem gamePlayerItem = Instantiate(GamePlayerItemSample.gameObject, GamePlayerItemAreaNode).GetComponent<GamePlayerItem>();
             gamePlayerItem.gameObject.SetActive(true);
             gamePlayerItem.SetItemIndex(index);
+            gamePlayerItems[i] = gamePlayerItem;
         }
         GamePlayerItemSample.gameObject.SetActive(false);
 
         _isDisplay = true;
 
         EventListener();
+    }
+
+    private void Update()
+    {
+        int childActiveCount = gamePlayerItems.Count(x => x.GetNodeObjActive());
+        GamePlayerItemAreaNode.sizeDelta = new Vector2(
+            GamePlayerItemAreaNode.sizeDelta.x, 
+            AreaAddHeight * childActiveCount);
     }
 
     /// <summary>

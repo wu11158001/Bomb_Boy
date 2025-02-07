@@ -13,9 +13,6 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     // LobbyView
     private LobbyView _lobbyView;
 
-    // 是否已登入Vivox
-    public bool IsLoginedVivox;
-
     private void OnDestroy()
     {
         UnBindVivoxEvent();
@@ -55,7 +52,6 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnLoggedInVivox()
     {
         Debug.Log("登入Vivox");
-        IsLoginedVivox = true;
     }
 
     /// <summary>
@@ -90,6 +86,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     /// <param name="participant"></param>
     private void OnParticipantAdded(VivoxParticipant participant)
     {
+        Debug.Log($"Vivox參與者加入: {participant.DisplayName}");
         VivoxParticipantList.Add(participant);
     }
 
@@ -99,6 +96,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     /// <param name="participant"></param>
     private void OnParticipantRemoved(VivoxParticipant participant)
     {
+        Debug.Log($"Vivox參與者移除: {participant.DisplayName}");
         VivoxParticipantList.Remove(participant);
     }
 
@@ -138,7 +136,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
             DisplayName = PlayerPrefs.GetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY),
             EnableTTS = true,
         };
-
+        
         await VivoxService.Instance.LoginAsync(options);
     }
 

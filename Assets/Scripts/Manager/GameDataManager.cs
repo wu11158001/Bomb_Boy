@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class GameDataManager : UnitySingleton<GameDataManager>
 {
+    // 是否已登入
+    public bool IsLogined;
     // 最大遊戲人數
     public const int MaxPlayer = 4;
     // 產生場景物件偏移量
