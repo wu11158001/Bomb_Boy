@@ -5,19 +5,12 @@ public class DropProps : BaseNetworkObject
 {
     [SerializeField] MeshRenderer _spriteRenderer;
 
-    private BoxCollider _boxCollider;
-
     // 掉落道具類型
     private NetworkVariable<DropPropsEnum> _dropPropsType = 
         new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     // 是否已被吃掉
     private bool _isGet;
-
-    private void Start()
-    {
-        _boxCollider = GetComponent<BoxCollider>();
-    }
 
     public override void OnNetworkSpawn()
     {
