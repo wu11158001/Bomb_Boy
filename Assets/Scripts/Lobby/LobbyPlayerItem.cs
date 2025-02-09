@@ -21,7 +21,7 @@ public class LobbyPlayerItem : MonoBehaviour
 
     private void Update()
     {
-        if (_vivoxParticipant != null)
+        if (_vivoxParticipant != null && NetworkManager.Singleton.IsListening)
         {
             SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
         }
@@ -93,13 +93,13 @@ public class LobbyPlayerItem : MonoBehaviour
         }
 
         // 交換房主按鈕
-        MigrateHost_Btn.gameObject.SetActive(isLocalHost && !isLocal);
+        /*MigrateHost_Btn.gameObject.SetActive(isLocalHost && !isLocal);
         MigrateHost_Btn.onClick.RemoveAllListeners();
         MigrateHost_Btn.onClick.AddListener(() =>
         {
             AudioManager.I.PlaySound(SoundEnum.Click);
             LobbyRpcManager.I.MigrateHostNotifyServerRpc(lobbyPlayerData.AuthenticationPlayerId);
-        });
+        });*/
 
         // 房主標示
         Host_Obj.SetActive(isLobbyHost);

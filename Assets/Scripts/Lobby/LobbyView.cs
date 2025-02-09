@@ -23,6 +23,10 @@ public class LobbyView : MonoBehaviour
     [Header("聊天區域")]
     [SerializeField] LobbyChatArea _lobbyChatArea;
 
+    [Space(30)]
+    [Header("測試")]
+    [SerializeField] bool isSinglePlay;
+
     // 大廳玩家項目
     private LobbyPlayerItem[] _lobbyPlayerItem_Array = new LobbyPlayerItem[4];
 
@@ -81,7 +85,7 @@ public class LobbyView : MonoBehaviour
 
                     AudioManager.I.PlaySound(SoundEnum.Confirm);
 
-                    /*if (NetworkManager.Singleton.ConnectedClients.Count < 2)
+                    if (!isSinglePlay && NetworkManager.Singleton.ConnectedClients.Count < 2)
                     {
                         Debug.Log("遊戲人數未滿2人");
                         LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "The number of players is less than 2", (text) =>
@@ -93,7 +97,7 @@ public class LobbyView : MonoBehaviour
                         });
                         
                         return;
-                    }*/
+                    }
 
                     bool isAllPrepare = true;
                     foreach (var playerData in LobbyRpcManager.I.LobbyPlayerData_List)

@@ -369,7 +369,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DebugTool: {fileID: 0}
-  IsUsingDebugTool: 1
+  IsUsingDebugTool: 0
+  RuntimeNetStatsMonitor: {fileID: 0}
   Loading_Obj: {fileID: 1821368868789690301}
   Nickname_If: {fileID: 6694811957175120585}
   NicknameErrorTip_Txt: {fileID: 1226206707478138264}

@@ -11,12 +11,16 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Netcode;
 using Unity.Services.Vivox;
-
+using Unity.Multiplayer.Tools.NetStatsMonitor;
 public class EntryView : MonoBehaviour
 {
     [Header("Debug 工具")]
     [SerializeField] GameObject DebugTool;
     [SerializeField] bool IsUsingDebugTool;
+
+    [Space(30)]
+    [Header("流量檢測")]
+    [SerializeField] RuntimeNetStatsMonitor RuntimeNetStatsMonitor;
 
     [SerializeField] GameObject Loading_Obj;
     [SerializeField] TMP_InputField Nickname_If;
@@ -98,6 +102,20 @@ public class EntryView : MonoBehaviour
         EventListener();
 
         GameDataManager.I.IsLogined = true;
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.RightAlt))
+        {
+            IsUsingDebugTool = !IsUsingDebugTool;
+            DebugTool.SetActive(IsUsingDebugTool);
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightControl))
+        {
+            RuntimeNetStatsMonitor.Visible = !RuntimeNetStatsMonitor.Visible;
+        }
     }
 
     /// <summary>
