@@ -7,7 +7,7 @@ using Unity.Services.Authentication;
 public class LobbyChatArea : MonoBehaviour
 {
     [SerializeField] Toggle SelfMute_Tog;
-    [SerializeField] TMP_InputField Chat_If;
+    [SerializeField] InputField Chat_If;
     [SerializeField] ScrollRect Chat_Sr;
     [SerializeField] RectTransform ChatNode;
     [SerializeField] VerticalLayoutGroup ChatNode_VLayout;

@@ -23,7 +23,7 @@ public class EntryView : MonoBehaviour
     [SerializeField] RuntimeNetStatsMonitor RuntimeNetStatsMonitor;
 
     [SerializeField] GameObject Loading_Obj;
-    [SerializeField] TMP_InputField Nickname_If;
+    [SerializeField] InputField Nickname_If;
     [SerializeField] TextMeshProUGUI NicknameErrorTip_Txt;
     [SerializeField] Button JoinLobby_Btn;
 
@@ -72,7 +72,6 @@ public class EntryView : MonoBehaviour
             VivoxManager.I.BindVivoxEvents();
         }       
 
-        Loading_Obj.SetActive(false);
         switch (LanguageManager.I.CurrLanguage)
         {
             // 中文
@@ -98,6 +97,7 @@ public class EntryView : MonoBehaviour
         Nickname_If.ActivateInputField();
         Nickname_If.text = recodeNickname;
 
+        Loading_Obj.SetActive(false);
         ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         EventListener();
 
@@ -106,12 +106,14 @@ public class EntryView : MonoBehaviour
 
     private void Update()
     {
+        // 開啟Debug工具
         if (Input.GetKeyDown(KeyCode.RightAlt))
         {
             IsUsingDebugTool = !IsUsingDebugTool;
             DebugTool.SetActive(IsUsingDebugTool);
         }
 
+        // 開啟流量檢測
         if (Input.GetKeyDown(KeyCode.RightControl))
         {
             RuntimeNetStatsMonitor.Visible = !RuntimeNetStatsMonitor.Visible;
