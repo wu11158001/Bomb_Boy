@@ -42,7 +42,7 @@ public class LobbyPlayerItem : MonoBehaviour
         Nickname_Txt.text = "";
         LanguageManager.I.GetString(LocalizationTableEnum.Lobby_Table, "Waiting to join", (text) =>
         {
-            Prepare_Txt.text = text;
+            Prepare_Txt.text = $"<color=#908C84>{text}</color>";
         });
 
         _vivoxParticipant = null;
@@ -112,7 +112,7 @@ public class LobbyPlayerItem : MonoBehaviour
         {
             if (lobbyPlayerData.IsPrepare)
             {
-                Prepare_Txt.text = text;
+                Prepare_Txt.text = $"<color=#FFB93C>{text}</color>";
             }
             else
             {
