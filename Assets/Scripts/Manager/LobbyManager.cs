@@ -90,7 +90,6 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             // 創建Lobby
             CreateLobbyOptions createLobbyOptions = new()
             {
-                Player = new Player(),
                 Data = new Dictionary<string, DataObject>()
                 {
                     // Relay加入代碼
@@ -102,10 +101,12 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             
             JoinedLobby = await LobbyService.Instance.CreateLobbyAsync(id, GameDataManager.MaxPlayer, createLobbyOptions);
             CurrLobbyHostId = JoinedLobby.HostId;
+            ChangeSceneManager.I.ChangeScene_Network(SceneEnum.Lobby);
 
             await JoinVivox();
 
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             Debug.Log($"創建大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
@@ -138,7 +139,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             JoinLobbyByIdOptions joinLobbyByIdOptions = new()
             {
-                Player = new Player(),
+                
             };
 
             // 加入Lobby
@@ -148,6 +149,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             await JoinVivox();
 
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             Debug.Log($"加入大廳, LobbyId: {JoinedLobby.Id}");
             return true;
         }
@@ -168,7 +170,6 @@ public class LobbyManager : UnitySingleton<LobbyManager>
         {
             QuickJoinLobbyOptions quickJoinLobbyOptions = new()
             {
-                Player = new Player(),
                 Filter = new List<QueryFilter>()
                 {
                     {new QueryFilter( QueryFilter.FieldOptions.S1, $"{LobbyDataKey.In_Team}", QueryFilter.OpOptions.EQ) },
@@ -181,12 +182,19 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             // 加入Relay
             string relayJoinCode = JoinedLobby.Data[$"{LobbyPlayerDataKey.RelayJoinCode}"].Value;
-            await RelayManager.I.JoinRelay(relayJoinCode);
+            bool isJoinRelay = await RelayManager.I.JoinRelay(relayJoinCode);
+            if (!isJoinRelay)
+            {
+                Debug.Log("快速加入大廳失敗,創建新大廳");
+                await LeaveLobby();
+                await CreateLobby();
+            }
             CurrRelayJoinCode = relayJoinCode;
-
+            
             await JoinVivox();
 
             InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             Debug.Log($"快速加入大廳, LobbyId: {JoinedLobby.Id}");
         }
         catch (LobbyServiceException e)
@@ -209,12 +217,9 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             if (JoinedLobby != null)
             {
                 NetworkManager.Singleton.Shutdown(false);
-                await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, AuthenticationService.Instance.PlayerId);
-
-                await VivoxManager.I.LogoutOfVivoxAsync();
-
                 JoinedLobby = null;
-
+                await VivoxManager.I.LeaveEchoChannelAsync();
+                await VivoxManager.I.LogoutOfVivoxAsync();
                 Debug.Log("離開大廳");
             }
         }
@@ -340,13 +345,11 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             {
                 Debug.Log($"Relay更換, {CurrRelayJoinCode} => {relayJoinCode}");
                 ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
-                CancelInvoke(nameof(RefreshRoom));
 
                 NetworkManager.Singleton.Shutdown(true);
                 await RelayManager.I.JoinRelay(relayJoinCode);
                 CurrRelayJoinCode = relayJoinCode;
 
-                InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
                 Debug.Log($"退出Relay重新連接: {relayJoinCode}");
             }
         }

@@ -539,6 +539,8 @@ public class GameRpcManager : NetworkBehaviour
         // 重製房間玩家
         LobbyRpcManager.I.ResetLobbyPlayerDataServerRpc();
 
+        yield return new WaitForSeconds(0.5f);
+
         // 返回大廳
         ChangeSceneManager.I.ChangeScene_Network(SceneEnum.Lobby);
     }

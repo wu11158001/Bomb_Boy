@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using Unity.Services.Vivox;
 using System.Linq;
+using System.Collections;
 
 public class LobbyPlayerItem : MonoBehaviour
 {
@@ -55,6 +56,11 @@ public class LobbyPlayerItem : MonoBehaviour
     public void UpdateLobbyPlayerItem(LobbyPlayerData lobbyPlayerData)
     {
         _vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == lobbyPlayerData.AuthenticationPlayerId).FirstOrDefault();
+        if (_vivoxParticipant == null)
+        {
+            StartCoroutine(IGetVivoxParticipant(lobbyPlayerData));
+        }
+
         bool isLobbyHost = LobbyManager.I.JoinedLobby.HostId == lobbyPlayerData.AuthenticationPlayerId;
         bool isLocalHost = LobbyManager.I.IsLobbyHost();
         bool isLocal = lobbyPlayerData.NetworkClientId == NetworkManager.Singleton.LocalClientId;
@@ -135,5 +141,21 @@ public class LobbyPlayerItem : MonoBehaviour
         });
 
         _previousLobbyPlayerData = lobbyPlayerData;
+    }
+
+    /// <summary>
+    /// 獲取Vivox參與者
+    /// </summary>
+    /// <param name="lobbyPlayerData"></param>
+    /// <returns></returns>
+    private IEnumerator IGetVivoxParticipant(LobbyPlayerData lobbyPlayerData)
+    {
+        yield return new WaitForSeconds(1);
+        _vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == lobbyPlayerData.AuthenticationPlayerId).FirstOrDefault();
+
+        if (_vivoxParticipant == null)
+        {
+            yield return IGetVivoxParticipant(lobbyPlayerData);
+        }
     }
 }

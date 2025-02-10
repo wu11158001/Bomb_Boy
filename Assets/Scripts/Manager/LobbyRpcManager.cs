@@ -159,7 +159,7 @@ public class LobbyRpcManager : NetworkBehaviour
     {
         if (networkClientId == NetworkManager.Singleton.LocalClientId)
         {
-            Debug.Log("被踢出大廳");
+            Debug.Log("被踢出大廳");            
             LeaveLobby(true);
         }
     }
@@ -313,8 +313,11 @@ public class LobbyRpcManager : NetworkBehaviour
     /// </summary>
     /// <param name="isKicked">是否是被踢出</param>
     public async void LeaveLobby(bool isKicked = false)
-    {       
+    {
+        LobbyManager.I.IsSelfLeaveLobby = true;
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+
+        await LobbyManager.I.LeaveLobby();
 
         if (isKicked)
         {
@@ -328,6 +331,5 @@ public class LobbyRpcManager : NetworkBehaviour
         }
 
         ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
-        await LobbyManager.I.LeaveLobby();
     }
 }

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Services.Lobbies.Models;
 using Unity.Services.Lobbies;
+using Unity.Services.Vivox;
 
 public class LobbyView : MonoBehaviour
 {
@@ -55,6 +56,11 @@ public class LobbyView : MonoBehaviour
 
         EventListener();
         UpdateListPlayerItem();
+
+        if (VivoxService.Instance.IsLoggedIn)
+        {
+            ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        }
     }
 
     /// <summary>
@@ -70,7 +76,6 @@ public class LobbyView : MonoBehaviour
             {
                 LobbyRpcManager.I.HostLeaveLobbyServerRpc();
             }
-            LobbyManager.I.IsSelfLeaveLobby = true;
             LobbyRpcManager.I.LeaveLobby();
         });
 
@@ -175,7 +180,6 @@ public class LobbyView : MonoBehaviour
             _lobbyPlayerItem_Array[i].UpdateLobbyPlayerItem(playerData_List[i]);
         }
 
-        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
     }
     

@@ -12,6 +12,7 @@ using Unity.Services.Lobbies.Models;
 using Unity.Netcode;
 using Unity.Services.Vivox;
 using Unity.Multiplayer.Tools.NetStatsMonitor;
+
 public class EntryView : MonoBehaviour
 {
     [Header("Debug 工具")]
@@ -42,7 +43,7 @@ public class EntryView : MonoBehaviour
 
     public void Awake()
     {
-        DebugTool.SetActive(IsUsingDebugTool);
+        DebugTool.SetActive(false);
     }
 
     private IEnumerator Start()
@@ -179,6 +180,7 @@ public class EntryView : MonoBehaviour
         // 嘗試斷線重連
         if (!string.IsNullOrEmpty(lobbyJoinId))
         {
+            Debug.Log("嘗試斷線重連");
             Lobby lobby = await LobbyManager.I.ReconnectQueryLobby(lobbyJoinId);
 
             if (lobby != null)
@@ -197,7 +199,7 @@ public class EntryView : MonoBehaviour
                             {
                                 Debug.Log("重新連線加入大廳失敗!");
                                 NetworkManager.Singleton.Shutdown(true);
-                                EnterGame();
+                                EnterLobby();
                             }
                         });
                     });
@@ -265,21 +267,18 @@ public class EntryView : MonoBehaviour
             return;
         }
 
-        EnterGame();
+        EnterLobby();
     }
 
     /// <summary>
-    /// 進入遊戲
+    /// 進入大廳
     /// </summary>
     /// <returns></returns>
-    private async void EnterGame()
+    private async void EnterLobby()
     {
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         PlayerPrefs.SetString(LocalDataKeyManager.LOCAL_NICKNAME_KEY, Nickname_If.text);
 
-
         await LobbyManager.I.QuickJoinLobby();
-
-        ChangeSceneManager.I.ChangeScene(SceneEnum.Lobby);
     }
 }

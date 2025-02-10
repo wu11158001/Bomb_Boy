@@ -69,13 +69,12 @@ public class GameView : MonoBehaviour
     private void EventListener()
     {
         // 退出遊戲按鈕
-        ExitGame_Btn.onClick.AddListener(async () =>
+        ExitGame_Btn.onClick.AddListener(() =>
         {
             AudioManager.I.PlaySound(SoundEnum.Cancel);
 
             ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
-            await LobbyManager.I.LeaveLobby();
-            ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
+            LobbyRpcManager.I.LeaveLobby();
         });
     }
 
@@ -155,7 +154,7 @@ public class GameView : MonoBehaviour
         InputController_Obj.SetActive(true);
         GameStartCD_Txt.gameObject.SetActive(true);
 
-        AudioManager.I.PlaySound(SoundEnum.Ready);
+        AudioManager.I.PlaySound(SoundEnum.Ready, false, 1);
 
         LanguageManager.I.GetString(LocalizationTableEnum.Game_Table, "Ready!", (text) =>
         {
@@ -224,5 +223,10 @@ public class GameView : MonoBehaviour
         {
             ReturnLobbyCD_Txt.text = $"{text}: {num}";
         });
+
+        if (num == 0)
+        {
+            ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
+        }
     }
 }

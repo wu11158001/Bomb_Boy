@@ -3,6 +3,7 @@ using Unity.Services.Vivox;
 using System.Threading.Tasks;
 using Unity.Services.Authentication;
 using System.Collections.Generic;
+using System.Linq;
 
 public class VivoxManager : UnitySingleton<VivoxManager>
 {
@@ -52,6 +53,8 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnLoggedInVivox()
     {
         Debug.Log("登入Vivox");
+        VivoxService.Instance.SetInputDeviceVolume(5);
+        VivoxService.Instance.SetOutputDeviceVolume(5);
     }
 
     /// <summary>
@@ -78,6 +81,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnChannelLeft(string channel)
     {
         Debug.Log($"離開Vivox頻道: {channel}");
+        VivoxParticipantList.Clear();
     }
 
     /// <summary>
@@ -87,7 +91,11 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnParticipantAdded(VivoxParticipant participant)
     {
         Debug.Log($"Vivox參與者加入: {participant.DisplayName}");
-        VivoxParticipantList.Add(participant);
+        if (VivoxParticipantList.All(x => x.PlayerId != participant.PlayerId))
+        {
+            Debug.Log($"Vivox添加參與者: {participant.DisplayName}");
+            VivoxParticipantList.Add(participant);
+        }
     }
 
     /// <summary>
@@ -97,7 +105,15 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnParticipantRemoved(VivoxParticipant participant)
     {
         Debug.Log($"Vivox參與者移除: {participant.DisplayName}");
-        VivoxParticipantList.Remove(participant);
+        try
+        {
+            VivoxParticipantList.Remove(participant);
+        }
+        catch (System.Exception)
+        {
+            Debug.LogError("Vivox參與者移除錯誤");
+        }
+        
     }
 
     /// <summary>

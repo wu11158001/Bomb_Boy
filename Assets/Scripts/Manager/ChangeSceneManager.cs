@@ -11,7 +11,6 @@ public class ChangeSceneManager : UnitySingleton<ChangeSceneManager>
     /// <param name="scene"></param>
     public void ChangeScene(SceneEnum scene)
     {
-        ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         StartCoroutine(ILoadSceneAsync(scene));
     }
     private IEnumerator ILoadSceneAsync(SceneEnum scene)
@@ -24,6 +23,7 @@ public class ChangeSceneManager : UnitySingleton<ChangeSceneManager>
             yield return null;
         }
 
+        ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
         Debug.Log($"進入場景:{scene} !");
     }
 
