@@ -16,7 +16,7 @@ using Unity.Multiplayer.Tools.NetStatsMonitor;
 public class EntryView : MonoBehaviour
 {
     [Header("Debug 工具")]
-    [SerializeField] GameObject DebugTool;
+    [SerializeField] Canvas DebugToolCanvas;
     [SerializeField] bool IsUsingDebugTool;
 
     [Space(30)]
@@ -43,7 +43,8 @@ public class EntryView : MonoBehaviour
 
     public void Awake()
     {
-        DebugTool.SetActive(false);
+        DebugToolCanvas = GameObject.Find("IngameDebugConsole").GetComponent<Canvas>(); 
+        DebugToolCanvas.enabled = false;
     }
 
     private IEnumerator Start()
@@ -111,13 +112,18 @@ public class EntryView : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightAlt))
         {
             IsUsingDebugTool = !IsUsingDebugTool;
-            DebugTool.SetActive(IsUsingDebugTool);
+            DebugToolCanvas.enabled = IsUsingDebugTool;
         }
 
         // 開啟流量檢測
         if (Input.GetKeyDown(KeyCode.RightControl))
         {
             RuntimeNetStatsMonitor.Visible = !RuntimeNetStatsMonitor.Visible;
+        }
+
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            LobbyManager.I.Query();
         }
     }
 

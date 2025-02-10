@@ -22,8 +22,11 @@ public class LobbyPlayerItem : MonoBehaviour
 
     private void Update()
     {
-        if (_vivoxParticipant != null && NetworkManager.Singleton.IsListening)
-        {
+        if (gameObject.activeSelf && 
+            _vivoxParticipant != null && 
+            NetworkManager.Singleton.IsListening && 
+            VivoxManager.I.IsVivoxLogined)
+        {            
             SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
         }
     }
@@ -55,6 +58,11 @@ public class LobbyPlayerItem : MonoBehaviour
     /// <param name="lobbyPlayerData"></param>
     public void UpdateLobbyPlayerItem(LobbyPlayerData lobbyPlayerData)
     {
+        if (LobbyManager.I.JoinedLobby == null)
+        {
+            return;
+        }
+
         _vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == lobbyPlayerData.AuthenticationPlayerId).FirstOrDefault();
         if (_vivoxParticipant == null)
         {

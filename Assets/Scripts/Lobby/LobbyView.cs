@@ -63,6 +63,14 @@ public class LobbyView : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            Debug.Log($"房間狀態:{LobbyManager.I.JoinedLobby.Data[$"{LobbyDataKey.State}"].Value}");
+        }
+    }
+
     /// <summary>
     /// 事件聆聽
     /// </summary>

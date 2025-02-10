@@ -804,6 +804,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 132536, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
   m_PrefabInstance: {fileID: 1592256223}
   m_PrefabAsset: {fileID: 0}
+--- !u!223 &1592256229 stripped
+Canvas:
+  m_CorrespondingSourceObject: {fileID: 22331464, guid: 67117722a812a2e46ab8cb8eafbf5f5e, type: 3}
+  m_PrefabInstance: {fileID: 1592256223}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &27628968903984861
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -925,6 +930,10 @@ PrefabInstance:
       propertyPath: DebugTool
       value: 
       objectReference: {fileID: 1592256224}
+    - target: {fileID: 6462260747072909235, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
+      propertyPath: DebugToolCanvas
+      value: 
+      objectReference: {fileID: 1592256229}
     - target: {fileID: 6462260747072909235, guid: a8723bf5aeb355f42b5c922f48514324, type: 3}
       propertyPath: RuntimeNetStatsMonitor
       value: 

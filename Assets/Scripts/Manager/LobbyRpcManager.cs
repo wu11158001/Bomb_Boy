@@ -129,7 +129,7 @@ public class LobbyRpcManager : NetworkBehaviour
             LobbyPlayerData_List.Remove(lobbyPlayerData);
             if (!LobbyManager.I.IsMigrateLobbyHost)
             {
-                LobbyService.Instance.RemovePlayerAsync(LobbyManager.I.JoinedLobby.Id, $"{lobbyPlayerData.AuthenticationPlayerId}");
+                LobbyManager.I.RemoveLobbyPlayer($"{lobbyPlayerData.AuthenticationPlayerId}");
                 Debug.Log($"大廳踢出玩家: {networkClientId}");
             }
            
@@ -181,10 +181,13 @@ public class LobbyRpcManager : NetworkBehaviour
     [ClientRpc]
     private void MigrateHostNotifyClientRpc(FixedString64Bytes authenticationPlayerId)
     {
-        LobbyManager.I.IsMigrateLobbyHost = true;
+        Debug.Log($"交換房主通知");
 
-        ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
-        LobbyManager.I.MigrateLobbyHost($"{authenticationPlayerId}");
+        if (!LobbyManager.I.IsSelfLeaveLobby)
+        {
+            LobbyManager.I.IsMigrateLobbyHost = true;
+            ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
+        }
     }
 
     /// <summary>
@@ -317,8 +320,25 @@ public class LobbyRpcManager : NetworkBehaviour
         LobbyManager.I.IsSelfLeaveLobby = true;
         ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.LoadingView);
 
-        await LobbyManager.I.LeaveLobby();
+        // 房主離開
+        if (IsServer)
+        {
+            FixedString64Bytes changeLobbyHostPlayerId = "";
+            for (int i = 0; i < LobbyPlayerData_List.Count; i++)
+            {
+                if (LobbyPlayerData_List[i].NetworkClientId != NetworkManager.Singleton.LocalClientId)
+                {
+                    changeLobbyHostPlayerId = LobbyPlayerData_List[i].AuthenticationPlayerId;
+                }
+            }
+            if (!string.IsNullOrEmpty($"{changeLobbyHostPlayerId}"))
+            {
+                MigrateHostNotifyServerRpc(changeLobbyHostPlayerId);
+            }
 
+        }
+
+        // 被踢除
         if (isKicked)
         {
             LanguageManager.I.GetString(LocalizationTableEnum.TipMessage_Table, "Kicked out of the lobby", (text) =>
@@ -330,6 +350,7 @@ public class LobbyRpcManager : NetworkBehaviour
             });
         }
 
+        await LobbyManager.I.LeaveLobby();
         ChangeSceneManager.I.ChangeScene(SceneEnum.Entry);
     }
 }

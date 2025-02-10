@@ -14,6 +14,9 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     // LobbyView
     private LobbyView _lobbyView;
 
+    // 是否已登入Vivox
+    public bool IsVivoxLogined;
+
     private void OnDestroy()
     {
         UnBindVivoxEvent();
@@ -53,6 +56,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnLoggedInVivox()
     {
         Debug.Log("登入Vivox");
+        IsVivoxLogined = true;
         VivoxService.Instance.SetInputDeviceVolume(5);
         VivoxService.Instance.SetOutputDeviceVolume(5);
     }
@@ -63,6 +67,7 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     private void OnLoggedOutVivox()
     {
         Debug.Log("登出Vivox");
+        IsVivoxLogined = false;
     }
 
     /// <summary>
@@ -90,7 +95,6 @@ public class VivoxManager : UnitySingleton<VivoxManager>
     /// <param name="participant"></param>
     private void OnParticipantAdded(VivoxParticipant participant)
     {
-        Debug.Log($"Vivox參與者加入: {participant.DisplayName}");
         if (VivoxParticipantList.All(x => x.PlayerId != participant.PlayerId))
         {
             Debug.Log($"Vivox添加參與者: {participant.DisplayName}");

@@ -23,15 +23,33 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     // 是否正在交換房主
     public bool IsMigrateLobbyHost { get; set; }
 
+    // 是否已在刷新大廳
+    private bool _isRefreshLobby;
+
     private void OnDestroy()
     {
         CancelInvoke(nameof(HandleLobbyHeartbeat));
-        CancelInvoke(nameof(RefreshRoom));
+        CancelInvoke(nameof(RefreshLobby));
     }
 
     private void Start()
     {
         InvokeRepeating(nameof(HandleLobbyHeartbeat), 15, 15);
+        InvokeRepeating(nameof(RefreshLobby), 1.1f, 1.1f);
+        _isRefreshLobby = true;
+    }
+
+    public async void Query()
+    {
+        QueryLobbiesOptions queryLobbiesOptions = new()
+        {
+            Filters = new List<QueryFilter>()
+                {
+                    {new QueryFilter( QueryFilter.FieldOptions.S1, $"{LobbyDataKey.In_Team}", QueryFilter.OpOptions.EQ) },
+                },
+        };
+
+        QueryResponse queryResponse = await LobbyService.Instance.QueryLobbiesAsync(queryLobbiesOptions);
     }
 
     /// <summary>
@@ -105,7 +123,12 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             await JoinVivox();
 
-            InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+            if (!_isRefreshLobby)
+            {
+                InvokeRepeating(nameof(RefreshLobby), 1.1f, 1.1f);
+                _isRefreshLobby = true;
+            }
+            
             ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             Debug.Log($"創建大廳, LobbyId: {JoinedLobby.Id}");
         }
@@ -148,7 +171,12 @@ public class LobbyManager : UnitySingleton<LobbyManager>
 
             await JoinVivox();
 
-            InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+            if (!_isRefreshLobby)
+            {
+                InvokeRepeating(nameof(RefreshLobby), 1.1f, 1.1f);
+                _isRefreshLobby = true;
+            }
+
             ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             Debug.Log($"加入大廳, LobbyId: {JoinedLobby.Id}");
             return true;
@@ -193,7 +221,12 @@ public class LobbyManager : UnitySingleton<LobbyManager>
             
             await JoinVivox();
 
-            InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
+            if (!_isRefreshLobby)
+            {
+                InvokeRepeating(nameof(RefreshLobby), 1.1f, 1.1f);
+                _isRefreshLobby = true;
+            }
+
             ViewManager.I.ClosePermanentView<RectTransform>(PermanentViewEnum.LoadingView);
             Debug.Log($"快速加入大廳, LobbyId: {JoinedLobby.Id}");
         }
@@ -206,21 +239,39 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     }
 
     /// <summary>
+    /// 移除大廳玩家
+    /// </summary>
+    /// <param name="authenticationId"></param>
+    /// <returns></returns>
+    public async void RemoveLobbyPlayer(string authenticationId)
+    {
+        await LobbyService.Instance.RemovePlayerAsync(JoinedLobby.Id, authenticationId);
+        Debug.Log($"移除大廳玩家: {authenticationId}");
+    }
+
+    /// <summary>
     /// 離開大廳
     /// </summary>
     public async Task LeaveLobby()
     {
-        CancelInvoke(nameof(RefreshRoom));
+        CancelInvoke(nameof(RefreshLobby));
+        _isRefreshLobby = false;
 
         try
         {
             if (JoinedLobby != null)
             {
                 NetworkManager.Singleton.Shutdown(false);
+                if (NetworkManager.Singleton.IsServer)
+                {
+                    RemoveLobbyPlayer(AuthenticationService.Instance.PlayerId);
+                    Debug.Log("Host離開大廳");
+                }
+
                 JoinedLobby = null;
                 await VivoxManager.I.LeaveEchoChannelAsync();
                 await VivoxManager.I.LogoutOfVivoxAsync();
-                Debug.Log("離開大廳");
+                Debug.Log("離開Vivox");
             }
         }
         catch (LobbyServiceException e)
@@ -302,7 +353,7 @@ public class LobbyManager : UnitySingleton<LobbyManager>
     /// <summary>
     /// 刷新房間
     /// </summary>
-    public async void RefreshRoom()
+    public async void RefreshLobby()
     {
         if (JoinedLobby == null) return;
 
@@ -323,7 +374,6 @@ public class LobbyManager : UnitySingleton<LobbyManager>
                 if (IsLobbyHost())
                 {
                     ViewManager.I.OpenPermanentView<RectTransform>(PermanentViewEnum.ReconnectView);
-                    CancelInvoke(nameof(RefreshRoom));
 
                     NetworkManager.Singleton.Shutdown(true);
                     relayJoinCode = await RelayManager.I.CreateRelay(GameDataManager.MaxPlayer - 1);
@@ -335,8 +385,6 @@ public class LobbyManager : UnitySingleton<LobbyManager>
                     });
 
                     Debug.Log($"更新Lobyy資料:Relay Join Code 更換 {relayJoinCode}");
-
-                    InvokeRepeating(nameof(RefreshRoom), 1.1f, 1.1f);
                     Debug.Log($"接收房主, 創建Relay: {relayJoinCode}");
                 }               
             }
