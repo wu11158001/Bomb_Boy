@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.Services.Vivox;
 using Unity.Services.Authentication;
+using System.Linq;
 
 public class LobbyChatArea : MonoBehaviour
 {
@@ -23,10 +24,12 @@ public class LobbyChatArea : MonoBehaviour
         ChatNode.sizeDelta = new Vector2(ChatNode.sizeDelta.x, 0);
         NewMsg_Btn.gameObject.SetActive(false);
 
-        // 初始本地靜音
-        VivoxManager.I.LocalMute(false);
-        SelfMute_Tog.isOn = false;
-
+        VivoxParticipant vivoxParticipant = VivoxManager.I.VivoxParticipantList.Where(x => x.PlayerId == AuthenticationService.Instance.PlayerId).FirstOrDefault();
+        if (vivoxParticipant != null)
+        {
+            SelfMute_Tog.isOn = vivoxParticipant.IsMuted;
+        }
+        
         EventListener();
     }
 
