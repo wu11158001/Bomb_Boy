@@ -14,6 +14,24 @@ public class GamePlayerItem : MonoBehaviour
     private int _itemIndex;
     private VivoxParticipant _vivoxParticipant;
 
+    private void OnDestroy()
+    {
+        if (_vivoxParticipant != null)
+        {
+            _vivoxParticipant.ParticipantMuteStateChanged -= UpdateVivoxUI;
+            _vivoxParticipant.ParticipantSpeechDetected -= UpdateVivoxUI;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (_vivoxParticipant != null)
+        {
+            _vivoxParticipant.ParticipantMuteStateChanged -= UpdateVivoxUI;
+            _vivoxParticipant.ParticipantSpeechDetected -= UpdateVivoxUI;
+        }
+    }
+
     private void Awake()
     {
         _itemIndex = -1;
@@ -30,28 +48,50 @@ public class GamePlayerItem : MonoBehaviour
 
         if (VivoxManager.I.VivoxParticipantList.Count - 1 >= _itemIndex)
         {
-            if (!Node_Obj.activeSelf)
+            if (_vivoxParticipant == null)
             {
                 Node_Obj.SetActive(true);
-            }
+                _vivoxParticipant = VivoxManager.I.VivoxParticipantList[_itemIndex];
 
-            _vivoxParticipant = VivoxManager.I.VivoxParticipantList[_itemIndex];
-            Mute_Tog.isOn = _vivoxParticipant.IsMuted;
+                // 暱稱文字
+                string takeNickname =
+                    _vivoxParticipant.DisplayName.Length > 6 ?
+                    $"{new string(_vivoxParticipant.DisplayName.ToArray().Take(6).ToArray())}..." :
+                    _vivoxParticipant.DisplayName;
+                Nickname_Txt.text = takeNickname;
 
-            // 暱稱文字
-            string takeNickname =
-                _vivoxParticipant.DisplayName.Length > 6 ?
-                $"{new string(_vivoxParticipant.DisplayName.ToArray().Take(6).ToArray())}..." :
-                _vivoxParticipant.DisplayName;
-            Nickname_Txt.text = takeNickname;
+                // 靜音按鈕
+                Mute_Tog.isOn = _vivoxParticipant.IsMuted;
+                Mute_Tog.onValueChanged.RemoveAllListeners();
+                Mute_Tog.onValueChanged.AddListener((isOn) =>
+                {
+                    if (isOn)
+                    {
+                        /*靜音*/
+                        _vivoxParticipant.MutePlayerLocally();
+                    }
+                    else
+                    {
+                        /*解除靜音*/
+                        _vivoxParticipant.UnmutePlayerLocally();
+                    }
+                });
 
-            // 語音偵測
-            SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
+                // 語音偵測
+                SpeechDetected_Obj.SetActive(false);
+
+                _vivoxParticipant.ParticipantMuteStateChanged -= UpdateVivoxUI;
+                _vivoxParticipant.ParticipantSpeechDetected -= UpdateVivoxUI;
+
+                _vivoxParticipant.ParticipantMuteStateChanged += UpdateVivoxUI;
+                _vivoxParticipant.ParticipantSpeechDetected += UpdateVivoxUI;
+            } 
         }
         else
         {
             if (Node_Obj.activeSelf)
             {
+                _vivoxParticipant = null;
                 Node_Obj.SetActive(false);
             }
         }
@@ -106,5 +146,20 @@ public class GamePlayerItem : MonoBehaviour
     public void SetItemIndex(int index)
     {
         _itemIndex = index;
+    }
+
+    /// <summary>
+    /// 更新Vivox UI
+    /// </summary>
+    private void UpdateVivoxUI()
+    {
+        if (_vivoxParticipant != null)
+        {          
+            // 語音偵測
+            if (!_vivoxParticipant.IsMuted)
+            {
+                SpeechDetected_Obj.SetActive(_vivoxParticipant.SpeechDetected);
+            }
+        }
     }
 }
