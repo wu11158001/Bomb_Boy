@@ -11,18 +11,9 @@ using Unity.Services.Lobbies;
 using Unity.Services.Lobbies.Models;
 using Unity.Netcode;
 using Unity.Services.Vivox;
-using Unity.Multiplayer.Tools.NetStatsMonitor;
 
 public class EntryView : MonoBehaviour
 {
-    [Header("Debug 工具")]
-    [SerializeField] Canvas DebugToolCanvas;
-    [SerializeField] bool IsUsingDebugTool;
-
-    [Space(30)]
-    [Header("流量檢測")]
-    [SerializeField] RuntimeNetStatsMonitor RuntimeNetStatsMonitor;
-
     [SerializeField] GameObject Loading_Obj;
     [SerializeField] InputField Nickname_If;
     [SerializeField] TextMeshProUGUI NicknameErrorTip_Txt;
@@ -39,12 +30,6 @@ public class EntryView : MonoBehaviour
     private void OnDestroy()
     {
         AuthenticationService.Instance.SignedIn -= OnSignedIn;        
-    }
-
-    public void Awake()
-    {
-        DebugToolCanvas = GameObject.Find("IngameDebugConsole").GetComponent<Canvas>(); 
-        DebugToolCanvas.enabled = false;
     }
 
     private IEnumerator Start()
@@ -104,27 +89,6 @@ public class EntryView : MonoBehaviour
         EventListener();
 
         GameDataManager.I.IsLogined = true;
-    }
-
-    private void Update()
-    {
-        // 開啟Debug工具
-        if (Input.GetKeyDown(KeyCode.RightAlt))
-        {
-            IsUsingDebugTool = !IsUsingDebugTool;
-            DebugToolCanvas.enabled = IsUsingDebugTool;
-        }
-
-        // 開啟流量檢測
-        if (Input.GetKeyDown(KeyCode.RightControl))
-        {
-            RuntimeNetStatsMonitor.Visible = !RuntimeNetStatsMonitor.Visible;
-        }
-
-        if (Input.GetKeyDown(KeyCode.K))
-        {
-            LobbyManager.I.Query();
-        }
     }
 
     /// <summary>
